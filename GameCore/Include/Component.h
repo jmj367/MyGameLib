@@ -1,6 +1,5 @@
 #pragma once
-#include "Commons/Math.h"
-#include "Defines/UpdateOrders.h"
+#include "Math.h"
 #include <typeindex>
 #include <rapidjson/document.h>
 #include <string>
@@ -12,7 +11,7 @@
 class Component
 {
 public:
-	Component(class Actor* owner, int updateOrder = COMPONENT_UPDATE_ORDER_DEFAULT);
+	Component(class Actor* owner, int updateOrder = 0);
 	virtual ~Component();
 
 	// ロード・セーブ処理

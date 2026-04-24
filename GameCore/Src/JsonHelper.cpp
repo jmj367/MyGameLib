@@ -1,6 +1,7 @@
 #include "JsonHelper.h"
 #include <fstream>
-#include <SDL/SDL_log.h>
+// SDLのログ機能を使うかは後で考える
+// #include <SDL/SDL_log.h>
 #include <vector>
 
 bool JsonHelper::LoadJSON(const std::string& fileName, rapidjson::Document& outDocument)
@@ -10,7 +11,7 @@ bool JsonHelper::LoadJSON(const std::string& fileName, rapidjson::Document& outD
 	std::ifstream file(fileName, std::ios::binary | std::ios::ate);
 	if (!file.is_open())
 	{
-		SDL_Log("File %s not found", fileName.c_str());
+		//SDL_Log("File %s not found", fileName.c_str());
 		return false;
 	}
 
@@ -27,7 +28,8 @@ bool JsonHelper::LoadJSON(const std::string& fileName, rapidjson::Document& outD
 	outDocument.Parse(bytes.data());
 	if (!outDocument.IsObject())
 	{
-		SDL_Log("File %s is not valid JSON", fileName.c_str());
+		//SDL_Log("File %s is not valid JSON", fileName.c_str());
+		return false;
 	}
 
 	return true;
