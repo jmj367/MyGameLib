@@ -3,7 +3,7 @@
 #include "Math.h"
 #include <rapidjson/document.h>
 
-// TODO: ロード側の処理を実装する
+// TODO: セーブ側の処理を実装する
 
 class JsonData
 {
