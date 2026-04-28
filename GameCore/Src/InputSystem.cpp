@@ -1,30 +1,27 @@
 #include "InputSystem.h"
-#include "Defines/FileNames.h"
 #include <cstring>
 #include <fstream>
-#include <magic_enum/magic_enum.hpp>
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 #include <sstream>
 #include <type_traits>
 
 // キーボード
-bool KeyboardState::GetKeyPressed(SDL_Scancode key) const
+bool KeyboardState::GetKeyPressed(KeyboardButton key) const
 {
 	return !mPrevKeysState[key] && mCurrKeysState[key];
 }
 
-bool KeyboardState::GetKeyHeld(SDL_Scancode key) const
+bool KeyboardState::GetKeyHeld(KeyboardButton key) const
 {
 	return mCurrKeysState[key];
 }
 
-bool KeyboardState::GetKeyReleased(SDL_Scancode key) const
+bool KeyboardState::GetKeyReleased(KeyboardButton key) const
 {
 	return mPrevKeysState[key] && !mCurrKeysState[key];
 }
 
 // マウス
-// マウスボタンだけ他と感じが違うので整理したほうがいいか？要検討
 bool MouseState::GetButtonPressed(MouseButton button) const
 {
 	int mask = SDL_BUTTON(button);
@@ -43,22 +40,22 @@ bool MouseState::GetButtonReleased(MouseButton button) const
 }
 
 // コントローラー
-bool ControllerState::GetButtonPressed(SDL_GameControllerButton button) const
+bool ControllerState::GetButtonPressed(ControllerButton button) const
 {
 	return !mPrevButtonsState[button] && mCurrButtonsState[button];
 }
 
-bool ControllerState::GetButtonHeld(SDL_GameControllerButton button) const
+bool ControllerState::GetButtonHeld(ControllerButton button) const
 {
 	return mCurrButtonsState[button];
 }
 
-bool ControllerState::GetButtonReleased(SDL_GameControllerButton button) const
+bool ControllerState::GetButtonReleased(ControllerButton button) const
 {
 	return mPrevButtonsState[button] && !mCurrButtonsState[button];
 }
 
-bool InputState::GetActionPressed(const std::string& action, int controller) const
+bool InputState::GetActionPressed(const std::string &action, int controller) const
 {
 	auto iter = InputBindings.find(action);
 	if (iter == InputBindings.end())
@@ -84,7 +81,7 @@ bool InputState::GetActionPressed(const std::string& action, int controller) con
 	return false;
 }
 
-bool InputState::GetActionHeld(const std::string& action, int controller) const
+bool InputState::GetActionHeld(const std::string &action, int controller) const
 {
 	auto iter = InputBindings.find(action);
 	if (iter == InputBindings.end())
@@ -110,7 +107,7 @@ bool InputState::GetActionHeld(const std::string& action, int controller) const
 	return false;
 }
 
-bool InputState::GetActionReleased(const std::string& action, int controller) const
+bool InputState::GetActionReleased(const std::string &action, int controller) const
 {
 	auto iter = InputBindings.find(action);
 	if (iter == InputBindings.end())
@@ -162,8 +159,6 @@ bool InputSystem::Initialize()
 		mState.Controllers.emplace_back(cs);
 	}
 
-	Load();
-
 	return true;
 }
 
@@ -177,12 +172,49 @@ void InputSystem::Shutdown()
 	}
 }
 
-void InputSystem::Load()
+void InputSystem::LoadInputBindings(const std::string &fileName)
 {
-	LoadInputBindings						(ACTION_MAP_FILE_NAMES::INPUT_BINDINGS);
-	LoadNameToCode<SDL_Scancode>			(ACTION_MAP_FILE_NAMES::KEYBOARD_NAME_TO_CODE,		mState.KeyboardNameToCode	);
-	LoadNameToCode<MouseState::MouseButton>	(ACTION_MAP_FILE_NAMES::MOUSE_NAME_TO_CODE,			mState.MouseNameToCode		);
-	LoadNameToCode<SDL_GameControllerButton>(ACTION_MAP_FILE_NAMES::CONTROLLER_NAME_TO_CODE,	mState.ControllerNameToCode	);
+	// csvを読み込む
+	std::ifstream file(fileName);
+	if (!file.is_open())
+	{
+		SDL_Log("InputBindings file %s is not found.", fileName.c_str());
+		return;
+	}
+
+	std::string line;
+
+	// 1行目を飛ばす
+	if (!std::getline(file, line))
+	{
+		SDL_Log("InputBinding file %s is empty.", fileName.c_str());
+		return;
+	}
+
+	// 行の読み取り
+	while (std::getline(file, line))
+	{
+		// 空行は飛ばす
+		if (line.empty())
+		{
+			continue;
+		}
+
+		// 値の読み取り
+		std::stringstream ss(line);
+		std::string action, device, keyBtn;
+
+		if (
+			std::getline(ss, action, ',') &&
+			std::getline(ss, device, ',') &&
+			std::getline(ss, keyBtn, ','))
+		{
+			std::vector<std::string> deviceKeyBtn;
+			deviceKeyBtn.emplace_back(device);
+			deviceKeyBtn.emplace_back(keyBtn);
+			mState.InputBindings.emplace(action, deviceKeyBtn);
+		}
+	}
 }
 
 void InputSystem::PrepareForPollEvent()
@@ -225,7 +257,7 @@ void InputSystem::Update()
 	// コントローラー
 	for (int i = 0; i < SDL_NumJoysticks(); i++)
 	{
-		ControllerState& c = mState.Controllers[i];
+		ControllerState &c = mState.Controllers[i];
 		// ボタン
 		for (int button = 0; button < SDL_CONTROLLER_BUTTON_MAX; button++)
 		{
@@ -246,15 +278,15 @@ void InputSystem::Update()
 
 		// スティック
 		x = SDL_GameControllerGetAxis(
-				c.mGameController, SDL_CONTROLLER_AXIS_LEFTX);
+			c.mGameController, SDL_CONTROLLER_AXIS_LEFTX);
 		y = SDL_GameControllerGetAxis(
-				c.mGameController, SDL_CONTROLLER_AXIS_LEFTY);
+			c.mGameController, SDL_CONTROLLER_AXIS_LEFTY);
 		c.mLeftStickAxis = SnapAndNormalize2D(x, y);
 
 		x = SDL_GameControllerGetAxis(
-				c.mGameController, SDL_CONTROLLER_AXIS_RIGHTX);
+			c.mGameController, SDL_CONTROLLER_AXIS_RIGHTX);
 		y = SDL_GameControllerGetAxis(
-				c.mGameController, SDL_CONTROLLER_AXIS_RIGHTY);
+			c.mGameController, SDL_CONTROLLER_AXIS_RIGHTY);
 		c.mRightStickAxis = SnapAndNormalize2D(x, y);
 	}
 }
@@ -269,7 +301,7 @@ void InputSystem::AddController(SDL_JoystickID controller)
 	// 接続したコントローラーの初期化
 	if (SDL_IsGameController(controller))
 	{
-		SDL_GameController* gc = SDL_GameControllerOpen(controller);
+		SDL_GameController *gc = SDL_GameControllerOpen(controller);
 		ControllerState cs;
 
 		memset(cs.mCurrButtonsState, 0, SDL_CONTROLLER_BUTTON_MAX);
@@ -303,103 +335,6 @@ void InputSystem::RemoveController(SDL_JoystickID controller)
 	}
 }
 
-void InputSystem::LoadInputBindings(const std::string& fileName)
-{
-	// csvを読み込む
-	std::ifstream file(fileName);
-	if (!file.is_open())
-	{
-		SDL_Log("InputBindings file %s is not found.", fileName.c_str());
-		return;
-	}
-
-	std::string line;
-
-	// 1行目を飛ばす
-	if (!std::getline(file, line))
-	{
-		SDL_Log("InputBinding file %s is empty.", fileName.c_str());
-		return;
-	}
-
-	// 行の読み取り
-	while (std::getline(file, line))
-	{
-		// 空行は飛ばす
-		if (line.empty())
-		{
-			continue;
-		}
-
-		// 値の読み取り
-		std::stringstream ss(line);
-		std::string action, device, keyBtn;
-
-		if (
-			std::getline(ss, action, ',') && 
-			std::getline(ss, device, ',') &&
-			std::getline(ss, keyBtn, ','))
-		{
-			std::vector<std::string> deviceKeyBtn;
-			deviceKeyBtn.emplace_back(device);
-			deviceKeyBtn.emplace_back(keyBtn);
-			mState.InputBindings.emplace(action, deviceKeyBtn);
-		}
-	}
-}
-
-template <typename CodeEnum, typename NameToCodeMap>
-void InputSystem::LoadNameToCode(const std::string& fileName, NameToCodeMap& nameToCodeMap)
-{
-	// csvを読み込む
-	std::ifstream file(fileName);
-	if (!file.is_open())
-	{
-		SDL_Log("NameToCode file %s is not found.", fileName.c_str());
-		return;
-	}
-
-	std::string line;
-
-	// 1行目は値の名前なので飛ばす
-	if (!std::getline(file, line))
-	{
-		SDL_Log("NameToCode file %s is empty.", fileName.c_str());
-		return;
-	}
-
-	// 行の読み取り
-	while (std::getline(file, line))
-	{
-		// 空行は飛ばす
-		if (line.empty())
-		{
-			continue;
-		}
-
-		// 値の読み取り
-		std::stringstream ss(line);
-		std::string keyBtnStr, codeStr;
-
-		if (
-			std::getline(ss, keyBtnStr,	',') &&
-			std::getline(ss, codeStr,	','))
-		{
-			// ファイルのコード(文字列)を列挙型に変換
-			auto codeEnumOpt = magic_enum::enum_cast<CodeEnum>(codeStr);
-
-			if (codeEnumOpt.has_value())
-			{
-				nameToCodeMap.emplace(keyBtnStr, codeEnumOpt.value());
-			}
-			else
-			{
-				SDL_Log("LoadNameToCode didn't find %s", codeStr);
-			}
-		}
-	}
-}
-
 float InputSystem::SnapAndNormalize1D(int input)
 {
 	const int deadZone = 250;
@@ -412,7 +347,8 @@ float InputSystem::SnapAndNormalize1D(int input)
 	{
 		// 正規化
 		retVal = static_cast<float>(
-			absValue - deadZone) / (maxValue - deadZone);
+					 absValue - deadZone) /
+				 (maxValue - deadZone);
 
 		retVal = input > 0 ? retVal : -retVal;
 
