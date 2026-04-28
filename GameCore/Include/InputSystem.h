@@ -1,5 +1,4 @@
 #pragma once
-#include "InputEnum.h"
 #include "Math.h"
 #include <string>
 #include <SDL2/SDL_mouse.h>
