@@ -6,6 +6,7 @@
 // See LICENSE in root directory for full details.
 // ----------------------------------------------------------------
 
+#include "Renderer.h"
 #include <string>
 
 class Texture
@@ -31,10 +32,14 @@ public:
 	// ゲッター
 	int GetWidth() const { return mWidth; }
 	int GetHeight() const { return mHeight; }
+	Renderer::ResourceID GetResourceID() const { return mResourceID; }
 	unsigned int GetTextureID() const { return mTextureID; }
 	const std::string &GetFileName() const { return mFileName; }
 
 private:
+	// リソースID
+	Renderer::ResourceID mResourceID;
+
 	// ファイル名
 	std::string mFileName;
 
