@@ -19,10 +19,6 @@ public:
 	bool Load(const std::string &fileName);
 	void Unload();
 
-	// SDL_Surfaceから作成
-	// テキストの描画等で使用
-	void CreateFromSurface(struct SDL_Surface *surface);
-
 	// レンダリング用テクスチャの作成
 	// サブカメラ等用
 	void CreateForRendering(int width, int height, unsigned int format);
