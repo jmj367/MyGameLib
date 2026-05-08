@@ -1,5 +1,6 @@
 #include "Renderer.h"
 #include "Game.h"
+#include "Shader.h"
 #include "Texture.h"
 
 Renderer::Renderer(Game *game)
@@ -75,7 +76,7 @@ void Renderer::DrawAmbientLight(const AmbientLightDrawInfo &ambientLight)
     mAmbientLightDrawList.push_back(ambientLight);
 }
 
-bool Renderer::GetTexture(const std::string &fileName, ResourceID& outID)
+bool Renderer::GetTexture(const std::string &fileName, ResourceID &outID)
 {
     // 既にキャッシュされているか確認
     auto iter = mTextureFileNameToID.find(fileName);
@@ -95,23 +96,43 @@ bool Renderer::GetTexture(const std::string &fileName, ResourceID& outID)
         outID = id;
         return true;
     }
-    else
+
+    return false;
+}
+
+bool Renderer::GetMesh(const std::string &fileName, ResourceID &outID)
+{
+    return false;
+}
+
+bool Renderer::GetSkeleton(const std::string &fileName, ResourceID &outID)
+{
+    return false;
+}
+
+bool Renderer::GetShader(const std::string &vertexShaderFileName, const std::string &fragmentShaderFileName, ResourceID &outID)
+{
+    // シェーダーは頂点シェーダーとフラグメントシェーダーの組み合わせで管理する
+    std::pair<std::string, std::string> shaderKey(vertexShaderFileName, fragmentShaderFileName);
+    auto iter = mShaderFileNameToID.find(shaderKey);
+    if (iter != mShaderFileNameToID.end())
     {
-        // 読み込み失敗
-        return false;
+        outID = iter->second;
+        return true;
     }
-}
 
-bool Renderer::GetMesh(const std::string &fileName, ResourceID& outID)
-{
-}
+    // キャッシュされていない場合は新規に読み込む
+    Shader shader;
+    if (shader.Load(vertexShaderFileName, fragmentShaderFileName))
+    {
+        ResourceID id = mNextResourceID++;
+        mShaders.emplace(id, std::move(shader));
+        mShaderFileNameToID[shaderKey] = id;
+        outID = id;
+        return true;
+    }
 
-bool Renderer::GetSkeleton(const std::string &fileName, ResourceID& outID)
-{
-}
-
-bool Renderer::GetShader(const std::string &vertexShaderFileName, const std::string &fragmentShaderFileName, ResourceID& outID)
-{
+    return false;
 }
 
 void Renderer::ReleaseTexture(ResourceID textureID)
@@ -142,6 +163,21 @@ void Renderer::ReleaseSkeleton(ResourceID skeletonID)
 
 void Renderer::ReleaseShader(ResourceID shaderID)
 {
+    // シェーダーIDからShaderオブジェクトを取得
+    auto iter = mShaders.find(shaderID);
+    if (iter != mShaders.end())
+    {
+        // シェーダーをアンロード
+        iter->second.Unload();
+
+        // ファイル名からIDのマップからも削除
+        const std::string &vertexShaderFileName = iter->second.GetVertexShaderFileName();
+        const std::string &fragmentShaderFileName = iter->second.GetFragmentShaderFileName();
+        mShaderFileNameToID.erase(std::make_pair(vertexShaderFileName, fragmentShaderFileName));
+
+        // シェーダーのキャッシュから削除
+        mShaders.erase(iter);
+    }
 }
 
 void Renderer::ReleaseTexture(const std::string &fileName)
@@ -165,6 +201,13 @@ void Renderer::ReleaseSkeleton(const std::string &fileName)
 
 void Renderer::ReleaseShader(const std::string &vertexShaderFileName, const std::string &fragmentShaderFileName)
 {
+    // ファイル名からIDを取得
+    auto iter = mShaderFileNameToID.find(std::make_pair(vertexShaderFileName, fragmentShaderFileName));
+    if (iter != mShaderFileNameToID.end())
+    {
+        ResourceID id = iter->second;
+        ReleaseShader(id);
+    }
 }
 
 void Renderer::ReleaseAllResources()
@@ -177,5 +220,13 @@ void Renderer::ReleaseAllResources()
     mTextures.clear();
     mTextureFileNameToID.clear();
 
-    // TODO: メッシュ、スケルトン、シェーダーも同様にアンロードしてキャッシュをクリアする
+    // シェーダーを全てアンロードしてキャッシュもクリア
+    for (auto &pair : mShaders)
+    {
+        pair.second.Unload();
+    }
+    mShaders.clear();
+    mShaderFileNameToID.clear();
+
+    // TODO: メッシュ、スケルトンも同様にアンロードしてキャッシュをクリアする
 }
