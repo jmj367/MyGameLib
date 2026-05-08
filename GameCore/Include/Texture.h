@@ -32,17 +32,10 @@ public:
 	// ゲッター
 	int GetWidth() const { return mWidth; }
 	int GetHeight() const { return mHeight; }
-	Renderer::ResourceID GetResourceID() const { return mResourceID; }
 	unsigned int GetTextureID() const { return mTextureID; }
 	const std::string &GetFileName() const { return mFileName; }
 
-	// セッター
-	void SetResourceID(Renderer::ResourceID id) { mResourceID = id; }
-
 private:
-	// リソースID
-	Renderer::ResourceID mResourceID;
-
 	// ファイル名
 	std::string mFileName;
 

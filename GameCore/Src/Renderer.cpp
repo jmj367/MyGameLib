@@ -17,7 +17,7 @@ bool Renderer::Initialize(float screenWidth, float screenHeight)
     mScreenHeight = screenHeight;
 
     return true;
-};
+}
 
 void Renderer::Shutdown()
 {
