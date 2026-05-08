@@ -99,10 +99,10 @@ public:
 	void DrawAmbientLight(const AmbientLightDrawInfo &ambientLight);
 
 	// リソースの取得/解放
-	ResourceID GetTexture(const std::string &fileName);
-	ResourceID GetMesh(const std::string &fileName);
-	ResourceID GetSkeleton(const std::string &fileName);
-	ResourceID GetShader(const std::string &vertexShaderFileName, const std::string &fragmentShaderFileName);
+	bool GetTexture(const std::string &fileName, ResourceID& outID);
+	bool GetMesh(const std::string &fileName, ResourceID& outID);
+	bool GetSkeleton(const std::string &fileName, ResourceID& outID);
+	bool GetShader(const std::string &vertexShaderFileName, const std::string &fragmentShaderFileName, ResourceID& outID);
 	void ReleaseTexture(ResourceID textureID);
 	void ReleaseMesh(ResourceID meshID);
 	void ReleaseSkeleton(ResourceID skeletonID);
