@@ -1,7 +1,6 @@
 #pragma once
 #include "Math.h"
 #include <string>
-#include <SDL2/SDL_types.h>
 #include <unordered_map>
 #include <vector>
 
@@ -84,7 +83,7 @@ private:
 
 	// チックカウント
 	// deltaTimeを求めるのに使う
-	Uint32 mTicksCount;
+	uint32_t mTicksCount;
 
 	// デバッグフラグ
 	bool mIsDebug;
