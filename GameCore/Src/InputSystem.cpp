@@ -2,6 +2,7 @@
 #include <cstring>
 #include <fstream>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_mouse.h>
 #include <sstream>
 #include <type_traits>
 
@@ -296,7 +297,7 @@ void InputSystem::UpdateMouseWheelDelta(float x, float y)
 	mState.Mouse.mWheelDelta = Vector2(x, y);
 }
 
-void InputSystem::AddController(SDL_JoystickID controller)
+void InputSystem::AddController(Sint32 controller)
 {
 	// 接続したコントローラーの初期化
 	if (SDL_IsGameController(controller))
@@ -312,7 +313,7 @@ void InputSystem::AddController(SDL_JoystickID controller)
 	}
 }
 
-void InputSystem::RemoveController(SDL_JoystickID controller)
+void InputSystem::RemoveController(Sint32 controller)
 {
 	if (SDL_IsGameController(controller))
 	{

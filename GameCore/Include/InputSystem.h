@@ -1,7 +1,7 @@
 #pragma once
 #include "Math.h"
+#include <cstdint>
 #include <string>
-#include <SDL2/SDL_mouse.h>
 #include <SDL2/SDL_gamecontroller.h>
 #include <unordered_map>
 #include <vector>
@@ -280,7 +280,7 @@ public:
 		EApp1 = 283,
 		EApp2 = 284,
 
-		EMax
+		EMax = 512
 	};
 
 	// キー状態の取得
@@ -290,8 +290,8 @@ public:
 
 private:
 	// キー状態の保持
-	const Uint8 *mCurrKeysState;
-	Uint8 mPrevKeysState[SDL_NUM_SCANCODES];
+	const uint8_t *mCurrKeysState;
+	uint8_t mPrevKeysState[KeyboardButton::EMax];
 };
 
 // マウス入力のヘルパー
@@ -332,8 +332,8 @@ private:
 	Vector2 mWheelDelta;
 
 	// ボタン状態の保持
-	Uint32 mCurrButtonsState;
-	Uint32 mPrevButtonsState;
+	uint32_t mCurrButtonsState;
+	uint32_t mPrevButtonsState;
 };
 
 // コントローラー入力のヘルパー
@@ -384,8 +384,8 @@ private:
 		mGameController;
 
 	// ボタン状態の保持
-	Uint8 mCurrButtonsState[ControllerButton::EMax];
-	Uint8 mPrevButtonsState[ControllerButton::EMax];
+	uint8_t mCurrButtonsState[ControllerButton::EMax];
+	uint8_t mPrevButtonsState[ControllerButton::EMax];
 
 	// スティック入力の保持
 	Vector2 mLeftStickAxis;
@@ -454,8 +454,8 @@ public:
 	void UpdateMouseWheelDelta(float x, float y);
 
 	// コントローラーの管理
-	void AddController(SDL_JoystickID controller);
-	void RemoveController(SDL_JoystickID controller);
+	void AddController(Sint32 controller);
+	void RemoveController(Sint32 controller);
 
 	// その他Getter
 	const InputState &GetState() const { return mState; }
