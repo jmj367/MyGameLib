@@ -2,11 +2,13 @@
 
 #include "Math.h"
 #include "MatrixPalette.h"
-#include "RendererBackend.h"
 #include <mutex>
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+// 前方宣言
+class RendererBackend;
 
 class Renderer
 {

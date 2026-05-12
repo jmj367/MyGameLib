@@ -1,22 +1,8 @@
 #include "Math.h"
 #include "MatrixPalette.h"
+#include "Renderer.h"
 #include <string>
 #include <vector>
-
-// 前方宣言
-class Renderer
-{
-public:
-    using ResourceID = size_t;
-
-    struct SpriteDrawInfo;
-    struct MeshDrawInfo;
-    struct SkinnedMeshDrawInfo;
-    struct PointLightDrawInfo;
-    struct SpotLightDrawInfo;
-    struct DirectionalLightDrawInfo;
-    struct AmbientLightDrawInfo;
-};
 
 class RendererBackend
 {
