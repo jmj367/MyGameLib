@@ -14,7 +14,7 @@ Renderer::~Renderer()
 {
 }
 
-bool Renderer::Initialize(float screenWidth, float screenHeight, GraphicsAPI apiType)
+bool Renderer::Initialize(void* windowHandle, float screenWidth, float screenHeight, GraphicsAPI apiType)
 {
     mScreenWidth = screenWidth;
     mScreenHeight = screenHeight;
@@ -29,7 +29,7 @@ bool Renderer::Initialize(float screenWidth, float screenHeight, GraphicsAPI api
         return false;
     }
 
-    mBackend->Initialize(screenWidth, screenHeight);
+    mBackend->Initialize(windowHandle, screenWidth, screenHeight);
 
     return true;
 }
@@ -221,8 +221,8 @@ void Renderer::ReleaseShader(const std::string &vertexShaderFileName, const std:
 void Renderer::ReleaseAllResources()
 {
     mBackend->ReleaseAllResources();
-    mTextureFileNameToID.clear();
-    mMeshFileNameToID.clear();
-    mSkeletonFileNameToID.clear();
-    mShaderFileNameToID.clear();
+    mTextureFileNameToID    .clear();
+    mMeshFileNameToID       .clear();
+    mSkeletonFileNameToID   .clear();
+    mShaderFileNameToID     .clear();
 }

@@ -22,7 +22,7 @@ public:
 	Renderer(class Game *game);
 	virtual ~Renderer();
 
-	virtual bool Initialize(float screenWidth, float screenHeight, GraphicsAPI apiType = GraphicsAPI::OpenGL);
+	virtual bool Initialize(void* windowHandle, float screenWidth, float screenHeight, GraphicsAPI apiType = GraphicsAPI::OpenGL);
 	virtual void Shutdown();
 	virtual void Draw();
 
@@ -32,11 +32,11 @@ public:
 	// スプライト描画の為の構造体
 	struct SpriteDrawInfo
 	{
-		size_t TextureID;
-		Vector2 TextureSize;
-		Matrix4 WorldTransform;
-		ResourceID ShaderID;
-		int DrawOrder;
+		size_t 		TextureID;
+		Vector2 	TextureSize;
+		Matrix4 	WorldTransform;
+		ResourceID 	ShaderID;
+		int 		DrawOrder;
 	};
 	// スプライトの描画コマンドを送信
 	void DrawSprite(const SpriteDrawInfo &spriteInfo);
@@ -44,10 +44,10 @@ public:
 	// メッシュ描画の為の構造体
 	struct MeshDrawInfo
 	{
-		ResourceID MeshID;
-		ResourceID TextureID;
-		Matrix4 WorldTransform;
-		ResourceID ShaderID;
+		ResourceID 	MeshID;
+		ResourceID 	TextureID;
+		Matrix4 	WorldTransform;
+		ResourceID 	ShaderID;
 	};
 	// メッシュの描画コマンドを送信
 	void DrawMesh(const MeshDrawInfo &meshInfo);
@@ -55,11 +55,11 @@ public:
 	// スキンメッシュ描画の為の構造体
 	struct SkinnedMeshDrawInfo
 	{
-		ResourceID MeshID;
-		ResourceID TextureID;
-		MatrixPalette MatrixPalette;
-		Matrix4 WorldTransform;
-		ResourceID ShaderID;
+		ResourceID 		MeshID;
+		ResourceID 		TextureID;
+		MatrixPalette 	MatrixPalette;
+		Matrix4 		WorldTransform;
+		ResourceID 		ShaderID;
 	};
 	// スキンメッシュの描画コマンドを送信
 	void DrawSkinnedMesh(const SkinnedMeshDrawInfo &skinnedMeshInfo);
@@ -68,9 +68,9 @@ public:
 	struct PointLightDrawInfo
 	{
 		Vector3 Position;
-		float Radius;
+		float 	Radius;
 		Vector3 Color;
-		float Intensity;
+		float 	Intensity;
 	};
 	// ポイントライトの描画コマンドを送信
 	void DrawPointLight(const PointLightDrawInfo &pointLight);
@@ -80,12 +80,12 @@ public:
 	struct SpotLightDrawInfo
 	{
 		Vector3 Position;
-		float Range;
+		float 	Range;
 		Vector3 Color;
-		float Intensity;
+		float 	Intensity;
 		Vector3 Direction;
-		float InnerAngle;
-		float OuterAngle;
+		float 	InnerAngle;
+		float 	OuterAngle;
 	};
 	// スポットライトの描画コマンドを送信
 	void DrawSpotLight(const SpotLightDrawInfo &spotLight);
@@ -109,24 +109,24 @@ public:
 	void DrawAmbientLight(const AmbientLightDrawInfo &ambientLight);
 
 	// リソースの取得/解放
-	bool GetTexture(const std::string &fileName, ResourceID& outID);
-	bool GetMesh(const std::string &fileName, ResourceID& outID);
-	bool GetSkeleton(const std::string &fileName, ResourceID& outID);
-	bool GetShader(const std::string &vertexShaderFileName, const std::string &fragmentShaderFileName, ResourceID& outID);
-	void ReleaseTexture(ResourceID textureID);
-	void ReleaseMesh(ResourceID meshID);
-	void ReleaseSkeleton(ResourceID skeletonID);
-	void ReleaseShader(ResourceID shaderID);
-	void ReleaseTexture(const std::string &fileName);
-	void ReleaseMesh(const std::string &fileName);
+	bool GetTexture		(const std::string &fileName, ResourceID& outID);
+	bool GetMesh		(const std::string &fileName, ResourceID& outID);
+	bool GetSkeleton	(const std::string &fileName, ResourceID& outID);
+	bool GetShader		(const std::string &vertexShaderFileName, const std::string &fragmentShaderFileName, ResourceID& outID);
+	void ReleaseTexture	(ResourceID textureID	);
+	void ReleaseMesh	(ResourceID meshID		);
+	void ReleaseSkeleton(ResourceID skeletonID	);
+	void ReleaseShader	(ResourceID shaderID	);
+	void ReleaseTexture	(const std::string &fileName);
+	void ReleaseMesh	(const std::string &fileName);
 	void ReleaseSkeleton(const std::string &fileName);
-	void ReleaseShader(const std::string &vertexShaderFileName, const std::string &fragmentShaderFileName);
+	void ReleaseShader	(const std::string &vertexShaderFileName, const std::string &fragmentShaderFileName);
 	void ReleaseAllResources();
 
 	// スクリーンサイズのゲッター
-	float GetScreenWidth() const { return mScreenWidth; }
-	float GetScreenHeight() const { return mScreenHeight; }
-	Vector2 GetScreenSize() const { return Vector2(mScreenWidth, mScreenHeight); }
+	float GetScreenWidth	() const { return mScreenWidth	; }
+	float GetScreenHeight	() const { return mScreenHeight	; }
+	Vector2 GetScreenSize	() const { return Vector2(mScreenWidth, mScreenHeight); }
 
 	// 透視投影行列
 	const Matrix4 &GetViewMatrix() const { return mViewMat; }
@@ -159,14 +159,14 @@ private:
 	std::unique_ptr<RendererBackend> mBackend;
 
 	// 描画コマンド
-	std::vector<SpriteDrawInfo> mSpriteDrawList;
-	std::vector<MeshDrawInfo> mMeshDrawList;
-	std::vector<SkinnedMeshDrawInfo> mSkinnedMeshDrawList;
-	std::vector<PointLightDrawInfo> mPointLightDrawList;
-	std::vector<SpotLightDrawInfo> mSpotLightDrawList;
+	std::vector<SpriteDrawInfo> 			mSpriteDrawList;
+	std::vector<MeshDrawInfo> 				mMeshDrawList;
+	std::vector<SkinnedMeshDrawInfo> 		mSkinnedMeshDrawList;
+	std::vector<PointLightDrawInfo> 		mPointLightDrawList;
+	std::vector<SpotLightDrawInfo> 			mSpotLightDrawList;
 	// ディレクショナルライトと環境光は数が少ないことが想定されるが、一応描画コマンドのリストにしておく
-	std::vector<DirectionalLightDrawInfo> mDirectionalLightDrawList;
-	std::vector<AmbientLightDrawInfo> mAmbientLightDrawList;
+	std::vector<DirectionalLightDrawInfo> 	mDirectionalLightDrawList;
+	std::vector<AmbientLightDrawInfo> 		mAmbientLightDrawList;
 
 	// 描画コマンドのロック
 	std::mutex mSpriteDrawListMutex;
