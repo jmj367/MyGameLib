@@ -4,6 +4,10 @@
 #include <string>
 #include <vector>
 
+// レンダラーのバックエンドのインターフェース
+// Rendererクラスは描画コマンドの管理とAPIに依存しないインターフェースを提供し、
+// RendererBackendクラスは実際の描画処理とリソース管理を担当する
+// このクラスを継承して、OpenGLやDirectX等の具体的なバックエンドを実装する
 class RendererBackend
 {
 public:
