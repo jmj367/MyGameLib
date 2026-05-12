@@ -56,7 +56,7 @@ void Renderer::Draw()
     };
 
     // 描画
-    mBackend->Draw(drawInfo);
+    mBackend->DrawFrame(drawInfo);
 
     // 描画コマンドのクリア
     {

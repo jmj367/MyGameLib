@@ -28,15 +28,15 @@ public:
     virtual void Draw       () = 0;
 
     // リソースの取得/解放
-	bool GetTexture     (const std::string &fileName, Renderer::ResourceID& outID);
-	bool GetMesh        (const std::string &fileName, Renderer::ResourceID& outID);
-	bool GetSkeleton    (const std::string &fileName, Renderer::ResourceID& outID);
-	bool GetShader      (const std::string &vertexShaderFileName, const std::string &fragmentShaderFileName, Renderer::ResourceID& outID);
-	void ReleaseTexture (Renderer::ResourceID textureID );
-	void ReleaseMesh    (Renderer::ResourceID meshID    );
-	void ReleaseSkeleton(Renderer::ResourceID skeletonID);
-	void ReleaseShader  (Renderer::ResourceID shaderID  );
-	void ReleaseAllResources();
+	virtual bool GetTexture     (const std::string &fileName, Renderer::ResourceID& outID) = 0;
+	virtual bool GetMesh        (const std::string &fileName, Renderer::ResourceID& outID) = 0;
+	virtual bool GetSkeleton    (const std::string &fileName, Renderer::ResourceID& outID) = 0;
+	virtual bool GetShader      (const std::string &vertexShaderFileName, const std::string &fragmentShaderFileName, Renderer::ResourceID& outID) = 0;
+	virtual void ReleaseTexture (Renderer::ResourceID textureID ) = 0;
+	virtual void ReleaseMesh    (Renderer::ResourceID meshID    ) = 0;
+	virtual void ReleaseSkeleton(Renderer::ResourceID skeletonID) = 0;
+	virtual void ReleaseShader  (Renderer::ResourceID shaderID  ) = 0;
+	virtual void ReleaseAllResources() = 0;
 
     // フレーム描画
     struct FrameDrawInfo
@@ -51,5 +51,5 @@ public:
         const std::vector<Renderer::DirectionalLightDrawInfo>&  DirectionalLights;
         const std::vector<Renderer::AmbientLightDrawInfo>&      AmbientLights;
     };
-    virtual void Draw(const FrameDrawInfo& drawInfo) = 0;
+    virtual void DrawFrame(const FrameDrawInfo& drawInfo) = 0;
 };
