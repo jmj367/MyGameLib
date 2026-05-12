@@ -4,7 +4,9 @@
 #include "Texture.h"
 
 Renderer::Renderer(Game *game)
-    : mGame(game), mScreenWidth(0.0f), mScreenHeight(0.0f)
+    : mGame(game)
+    , mScreenWidth(0.0f)
+    , mScreenHeight(0.0f)
 {
 }
 
@@ -12,20 +14,79 @@ Renderer::~Renderer()
 {
 }
 
-bool Renderer::Initialize(float screenWidth, float screenHeight)
+bool Renderer::Initialize(float screenWidth, float screenHeight, GraphicsAPI apiType)
 {
     mScreenWidth = screenWidth;
     mScreenHeight = screenHeight;
+
+    // バックエンドの初期化
+    switch (apiType)
+    {
+    case GraphicsAPI::OpenGL:
+        mBackend = std::make_unique<OpenGLRendererBackend>(this);
+        break;
+    default:
+        return false;
+    }
+
+    mBackend->Initialize(screenWidth, screenHeight);
 
     return true;
 }
 
 void Renderer::Shutdown()
 {
+    mBackend->Shutdown();
 }
 
 void Renderer::Draw()
 {
+    // パッケージング
+    RendererBackend::FrameDrawInfo drawInfo
+    {
+        mViewMat,
+        mProjMat,
+        mSpriteDrawList,
+        mMeshDrawList,
+        mSkinnedMeshDrawList,
+        mPointLightDrawList,
+        mSpotLightDrawList,
+        mDirectionalLightDrawList,
+        mAmbientLightDrawList
+    };
+
+    // 描画
+    mBackend->Draw(drawInfo);
+
+    // 描画コマンドのクリア
+    {
+        std::lock_guard<std::mutex> lock(mSpriteDrawListMutex);
+        mSpriteDrawList.clear();
+    }
+    {
+        std::lock_guard<std::mutex> lock(mMeshDrawListMutex);
+        mMeshDrawList.clear();
+    }
+    {
+        std::lock_guard<std::mutex> lock(mSkinnedMeshDrawListMutex);
+        mSkinnedMeshDrawList.clear();
+    }
+    {
+        std::lock_guard<std::mutex> lock(mPointLightDrawListMutex);
+        mPointLightDrawList.clear();
+    }
+    {
+        std::lock_guard<std::mutex> lock(mSpotLightDrawListMutex);
+        mSpotLightDrawList.clear();
+    }
+    {
+        std::lock_guard<std::mutex> lock(mDirectionalLightDrawListMutex);
+        mDirectionalLightDrawList.clear();
+    }
+    {
+        std::lock_guard<std::mutex> lock(mAmbientLightDrawListMutex);
+        mAmbientLightDrawList.clear();
+    }
 }
 
 void Renderer::DrawSprite(const SpriteDrawInfo &spriteInfo)
@@ -78,155 +139,90 @@ void Renderer::DrawAmbientLight(const AmbientLightDrawInfo &ambientLight)
 
 bool Renderer::GetTexture(const std::string &fileName, ResourceID &outID)
 {
-    // 既にキャッシュされているか確認
-    auto iter = mTextureFileNameToID.find(fileName);
-    if (iter != mTextureFileNameToID.end())
-    {
-        outID = iter->second;
-        return true;
-    }
-
-    // キャッシュされていない場合は新規に読み込む
-    Texture texture;
-    if (texture.Load(fileName))
-    {
-        ResourceID id = mNextResourceID++;
-        mTextures.emplace(id, std::move(texture));
-        mTextureFileNameToID[fileName] = id;
-        outID = id;
-        return true;
-    }
-
-    return false;
+    return mBackend->GetTexture(fileName, outID);
 }
 
 bool Renderer::GetMesh(const std::string &fileName, ResourceID &outID)
 {
-    return false;
+    return mBackend->GetMesh(fileName, outID);
 }
 
 bool Renderer::GetSkeleton(const std::string &fileName, ResourceID &outID)
 {
-    return false;
+    return mBackend->GetSkeleton(fileName, outID);
 }
 
 bool Renderer::GetShader(const std::string &vertexShaderFileName, const std::string &fragmentShaderFileName, ResourceID &outID)
 {
-    // シェーダーは頂点シェーダーとフラグメントシェーダーの組み合わせで管理する
-    std::pair<std::string, std::string> shaderKey(vertexShaderFileName, fragmentShaderFileName);
-    auto iter = mShaderFileNameToID.find(shaderKey);
-    if (iter != mShaderFileNameToID.end())
-    {
-        outID = iter->second;
-        return true;
-    }
-
-    // キャッシュされていない場合は新規に読み込む
-    Shader shader;
-    if (shader.Load(vertexShaderFileName, fragmentShaderFileName))
-    {
-        ResourceID id = mNextResourceID++;
-        mShaders.emplace(id, std::move(shader));
-        mShaderFileNameToID[shaderKey] = id;
-        outID = id;
-        return true;
-    }
-
-    return false;
+    return mBackend->GetShader(vertexShaderFileName, fragmentShaderFileName, outID);
 }
 
 void Renderer::ReleaseTexture(ResourceID textureID)
 {
-    // テクスチャIDからTextureオブジェクトを取得
-    auto iter = mTextures.find(textureID);
-    if (iter != mTextures.end())
-    {
-        // テクスチャをアンロード
-        iter->second.Unload();
-
-        // ファイル名からIDのマップからも削除
-        const std::string &fileName = iter->second.GetFileName();
-        mTextureFileNameToID.erase(fileName);
-
-        // テクスチャのキャッシュから削除
-        mTextures.erase(iter);
-    }
+    mBackend->ReleaseTexture(textureID);
 }
 
 void Renderer::ReleaseMesh(ResourceID meshID)
 {
+    mBackend->ReleaseMesh(meshID);
 }
 
 void Renderer::ReleaseSkeleton(ResourceID skeletonID)
 {
+    mBackend->ReleaseSkeleton(skeletonID);
 }
 
 void Renderer::ReleaseShader(ResourceID shaderID)
 {
-    // シェーダーIDからShaderオブジェクトを取得
-    auto iter = mShaders.find(shaderID);
-    if (iter != mShaders.end())
-    {
-        // シェーダーをアンロード
-        iter->second.Unload();
-
-        // ファイル名からIDのマップからも削除
-        const std::string &vertexShaderFileName = iter->second.GetVertexShaderFileName();
-        const std::string &fragmentShaderFileName = iter->second.GetFragmentShaderFileName();
-        mShaderFileNameToID.erase(std::make_pair(vertexShaderFileName, fragmentShaderFileName));
-
-        // シェーダーのキャッシュから削除
-        mShaders.erase(iter);
-    }
+    mBackend->ReleaseShader(shaderID);
 }
 
 void Renderer::ReleaseTexture(const std::string &fileName)
 {
-    // ファイル名からIDを取得
+    // ファイル名からIDを取得して解放
     auto iter = mTextureFileNameToID.find(fileName);
     if (iter != mTextureFileNameToID.end())
     {
-        ResourceID id = iter->second;
-        ReleaseTexture(id);
+        ReleaseTexture(iter->second);
+        mTextureFileNameToID.erase(iter);
     }
 }
 
 void Renderer::ReleaseMesh(const std::string &fileName)
 {
+    auto iter = mMeshFileNameToID.find(fileName);
+    if (iter != mMeshFileNameToID.end())
+    {
+        ReleaseMesh(iter->second);
+        mMeshFileNameToID.erase(iter);
+    }
 }
 
 void Renderer::ReleaseSkeleton(const std::string &fileName)
 {
+    auto iter = mSkeletonFileNameToID.find(fileName);
+    if (iter != mSkeletonFileNameToID.end())
+    {
+        ReleaseSkeleton(iter->second);
+        mSkeletonFileNameToID.erase(iter);
+    }
 }
 
 void Renderer::ReleaseShader(const std::string &vertexShaderFileName, const std::string &fragmentShaderFileName)
 {
-    // ファイル名からIDを取得
     auto iter = mShaderFileNameToID.find(std::make_pair(vertexShaderFileName, fragmentShaderFileName));
     if (iter != mShaderFileNameToID.end())
     {
-        ResourceID id = iter->second;
-        ReleaseShader(id);
+        ReleaseShader(iter->second);
+        mShaderFileNameToID.erase(iter);
     }
 }
 
 void Renderer::ReleaseAllResources()
 {
-    // テクスチャを全てアンロードしてキャッシュもクリア
-    for (auto &pair : mTextures)
-    {
-        pair.second.Unload();
-    }
-    mTextures.clear();
+    mBackend->ReleaseAllResources();
     mTextureFileNameToID.clear();
-
-    // シェーダーを全てアンロードしてキャッシュもクリア
-    for (auto &pair : mShaders)
-    {
-        pair.second.Unload();
-    }
-    mShaders.clear();
+    mMeshFileNameToID.clear();
+    mSkeletonFileNameToID.clear();
     mShaderFileNameToID.clear();
-
-    // TODO: メッシュ、スケルトンも同様にアンロードしてキャッシュをクリアする
 }

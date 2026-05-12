@@ -2,6 +2,7 @@
 
 #include "Math.h"
 #include "MatrixPalette.h"
+#include "RendererBackend.h"
 #include <mutex>
 #include <string>
 #include <unordered_map>
@@ -12,12 +13,21 @@ class Renderer
 public:
 	using ResourceID = size_t;
 
+	// APIの種類
+	enum class GraphicsAPI
+	{
+		OpenGL,
+	};
+
 	Renderer(class Game *game);
 	virtual ~Renderer();
 
-	virtual bool Initialize(float screenWidth, float screenHeight);
+	virtual bool Initialize(float screenWidth, float screenHeight, GraphicsAPI apiType = GraphicsAPI::OpenGL);
 	virtual void Shutdown();
 	virtual void Draw();
+
+	// 各種描画コマンドの構造体と送信関数
+	// RendererBackendをラップする
 
 	// スプライト描画の為の構造体
 	struct SpriteDrawInfo
@@ -139,16 +149,14 @@ private:
 	// リソースIDの管理
 	ResourceID mNextResourceID;
 
-	// リソースのキャッシュ
-	std::unordered_map<ResourceID, class Texture> mTextures;
-	std::unordered_map<ResourceID, class Mesh> mMeshes;
-	std::unordered_map<ResourceID, class Skeleton> mSkeletons;
-	std::unordered_map<ResourceID, class Shader> mShaders;
 	// リソース検索用マップ
 	std::unordered_map<std::string, ResourceID> mTextureFileNameToID;
 	std::unordered_map<std::string, ResourceID> mMeshFileNameToID;
 	std::unordered_map<std::string, ResourceID> mSkeletonFileNameToID;
 	std::unordered_map<std::pair<std::string, std::string>, ResourceID> mShaderFileNameToID;
+
+	// バックエンドのインスタンス
+	std::unique_ptr<RendererBackend> mBackend;
 
 	// 描画コマンド
 	std::vector<SpriteDrawInfo> mSpriteDrawList;
