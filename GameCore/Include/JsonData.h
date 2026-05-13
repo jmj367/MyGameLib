@@ -48,6 +48,8 @@ private:
 class JsonArray
 {
 public:
+    JsonArray() = default;
+
     // 値の取得
     template <typename T>
     bool Get(size_t index, T &outValue) const
@@ -143,6 +145,8 @@ private:
 class JsonObject
 {
 public:
+    JsonObject() = default;
+
     // 値の取得
     template <typename T>
     bool Get(const char *propertyName, T &outValue) const

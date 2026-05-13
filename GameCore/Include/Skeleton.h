@@ -39,7 +39,7 @@ private:
 	// ボーン
 	std::vector<Bone> mBones;
 
-	// NOTE: ボーンインデックスの情報が多数ファイルに渡って使われるためソート不可
+	// NOTE: ボーンインデックスの情報がアニメーション等多数ファイルに渡って使われるためソート不可
 	// 親ボーンと子ボーンの対応
 	std::unordered_map<int, std::vector<int>> mBoneChildrenIndex;
 
