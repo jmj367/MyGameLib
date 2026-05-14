@@ -20,6 +20,14 @@ public:
 	static const int ROOT_BONE			= 0;
 	static const int ROOT_BONE_PARENT	= -1;
 
+	bool Initialize(const std::vector<Bone>& bones, const std::unordered_map<int, std::vector<int>>& boneChildrenIndex);
+	{
+		mBones = bones;
+		mBoneChildrenIndex = boneChildrenIndex;
+		ComputeGlobalInvBindPose();
+		return true;
+	}
+
 	bool Load(const std::string& fileName);
 
 	// その他ゲッター
