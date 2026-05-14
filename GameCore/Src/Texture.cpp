@@ -34,7 +34,7 @@ bool Texture::Load(const std::string& fileName)
 	
 	if (image == nullptr)
 	{
-		SDL_Log("Failed to load image %s: %s", fileName.c_str(), stbi_failure_reason());
+		//SDL_Log("Failed to load image %s: %s", fileName.c_str(), stbi_failure_reason());
 		return false;
 	}
 	

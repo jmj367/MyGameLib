@@ -15,6 +15,8 @@
 class Mesh
 {
 public:
+	using ResourceID = size_t;
+
 	Mesh();
 	~Mesh();
 
@@ -23,7 +25,7 @@ public:
 	void Unload();
 	
 	// インデックスのテクスチャを取得
-	class Texture* GetTexture(size_t index);
+	ResourceID GetTexture(size_t index);
 
 	// バイナリ形式でメッシュを保存
 	void SaveBinary(
@@ -49,7 +51,7 @@ public:
 		  float			GetSpecPower	() const { return mSpecPower	; }
 private:
 	// メッシュに関連付けられたテクスチャ群
-	std::vector<class Texture*> mTextures;
+	std::vector<Renderer::ResourceID> mTextures;
 	// 頂点配列オブジェクト
 	VertexArray* mVertexArray;
 	// 使用するシェーダー名
