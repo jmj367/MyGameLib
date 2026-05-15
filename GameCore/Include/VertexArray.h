@@ -18,6 +18,7 @@ public:
 		PosNormSkinTex
 	};
 
+	VertexArray() = default;
 	VertexArray(const void* verts, unsigned int numVerts, Layout layout,
 		const unsigned int* indices, unsigned int numIndices);
 	~VertexArray();
