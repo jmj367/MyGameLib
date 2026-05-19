@@ -227,3 +227,56 @@ void Renderer::ReleaseAllResources()
     mSkeletonFileNameToID   .clear();
     mShaderFileNameToID     .clear();
 }
+
+bool Renderer::GetTexture(ResourceID textureID, std::string &outFileName)
+{
+    for (const auto &pair : mTextureFileNameToID)
+    {
+        if (pair.second == textureID)
+        {
+            outFileName = pair.first;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Renderer::GetMesh(ResourceID meshID, std::string &outFileName)
+{
+    for (const auto &pair : mMeshFileNameToID)
+    {
+        if (pair.second == meshID)
+        {
+            outFileName = pair.first;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Renderer::GetSkeleton(ResourceID skeletonID, std::string &outFileName)
+{
+    for (const auto &pair : mSkeletonFileNameToID)
+    {
+        if (pair.second == skeletonID)
+        {
+            outFileName = pair.first;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Renderer::GetShader(ResourceID shaderID, std::string &outVertexShaderFileName, std::string &outFragmentShaderFileName)
+{
+    for (const auto &pair : mShaderFileNameToID)
+    {
+        if (pair.second == shaderID)
+        {
+            outVertexShaderFileName = pair.first.first;
+            outFragmentShaderFileName = pair.first.second;
+            return true;
+        }
+    }
+    return false;
+}

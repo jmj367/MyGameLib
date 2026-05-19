@@ -33,9 +33,6 @@ public:
 		mSpecPower = specPower;
 	}
 
-	// インデックスのテクスチャを取得
-	ResourceID GetTexture(size_t index);
-
 	// バイナリ形式でメッシュを保存
 	void SaveBinary(
 		const std::string &fileName,
@@ -49,15 +46,18 @@ public:
 		float specPower);
 
 	// ゲッター
+	ResourceID GetTexture(size_t index) const { return mTextures[index]; }
 	VertexArray *GetVertexArray() { return &mVertexArray; }
 	const std::string &GetShaderName() const { return mShaderName; }
 	const std::string &GetFileName() const { return mFileName; }
 	float GetRadius() const { return mRadius; }
 	float GetSpecPower() const { return mSpecPower; }
+	size_t GetNumTextures() const { return mTextures.size(); }
 
 private:
 	// メッシュに関連付けられたテクスチャ群
 	std::vector<ResourceID> mTextures;
+
 	// 頂点配列オブジェクト
 	VertexArray mVertexArray;
 	// 使用するシェーダー名

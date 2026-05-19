@@ -125,6 +125,12 @@ public:
 	void ReleaseShader	(const std::string &vertexShaderFileName, const std::string &fragmentShaderFileName);
 	void ReleaseAllResources();
 
+	// リソースIDからリソース名を取得
+	bool GetTexture	(ResourceID textureID	, std::string &outFileName);
+	bool GetMesh	(ResourceID meshID		, std::string &outFileName);
+	bool GetSkeleton(ResourceID skeletonID	, std::string &outFileName);
+	bool GetShader	(ResourceID shaderID	, std::string &outVertexShaderFileName, std::string &outFragmentShaderFileName);
+
 	// スクリーンサイズのゲッター
 	float GetScreenWidth	() const { return mScreenWidth	; }
 	float GetScreenHeight	() const { return mScreenHeight	; }
