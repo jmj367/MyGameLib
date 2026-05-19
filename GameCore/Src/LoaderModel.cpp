@@ -6,37 +6,6 @@
 #include <vector>
 #include <unordered_map>
 
-// HACK: Meshのバイナリ形式用の構造体(Mesh.cppに定義しているものと同じ)
-namespace
-{
-    union Vertex
-    {
-        float f;
-        uint8_t b[4];
-    };
-
-    struct MeshBinHeader
-    {
-        // シグネチャ
-        char mSignature[4] = {'G', 'M', 'S', 'H'};
-
-        // バージョン
-        uint32_t mVersion = 1;
-
-        // 頂点フォーマット
-        VertexArray::Layout mLayout = VertexArray::PosNormTex;
-
-        // テクスチャ数
-        uint32_t mNumTextures = 0;
-        uint32_t mNumVerts = 0;
-        uint32_t mNumIndices = 0;
-
-        // プロパティ
-        float mRadius = 0.0f;
-        float mSpecPower = 100.0f;
-    };
-}
-
 bool LoaderModel::LoadMesh(const std::string &fileName, Mesh &mesh, Renderer *renderer)
 {
     // ファイルの拡張子を確認して、適切なローダー関数を呼び出す
@@ -154,7 +123,7 @@ bool LoaderModel::LoadMeshJson(JsonObject* data, Mesh &mesh, Renderer *renderer)
         return false;
     }
 
-    std::vector<Vertex> vertices;
+    std::vector<MeshBinary::Vertex> vertices;
     vertices.reserve(verts.Size());
     float radius = 0.0f;
     for (size_t i = 0; i < verts.Size(); i++)
@@ -176,7 +145,7 @@ bool LoaderModel::LoadMeshJson(JsonObject* data, Mesh &mesh, Renderer *renderer)
 
         if(layout == VertexArray::PosNormTex)
         {
-            Vertex v;
+            MeshBinary::Vertex v;
             // 位置・法線・テクスチャ座標を追加
             for(int j = 0; j < vert.Size(); j++)
             {
@@ -189,7 +158,7 @@ bool LoaderModel::LoadMeshJson(JsonObject* data, Mesh &mesh, Renderer *renderer)
         }
         else if (layout == VertexArray::PosNormSkinTex)
         {
-            Vertex v;
+            MeshBinary::Vertex v;
             // 位置・法線を追加
             for(int j = 0; j < 6; j++)
             {
@@ -203,6 +172,7 @@ bool LoaderModel::LoadMeshJson(JsonObject* data, Mesh &mesh, Renderer *renderer)
             // スキンウェイトを追加
             for(int j = 6; j < 14; j += 4)
             {
+                MeshBinary::Vertex v;
                 uint32_t b;
                 if(!vert.Get(j, b))
                 {
@@ -313,7 +283,7 @@ bool LoaderModel::LoadMeshBinary(const std::string &fileName, Mesh &mesh, Render
     }
 
     // ヘッダーの読み込み
-    MeshBinHeader header;
+    MeshBinary::MeshBinHeader header;
     file.read(reinterpret_cast<char*>(&header), sizeof(header));
 
     // シグネチャの確認

@@ -12,6 +12,38 @@
 #include <vector>
 #include <string>
 
+namespace MeshBinary
+{
+	union Vertex
+	{
+		float f;
+		uint8_t b[4];
+	};
+
+	const int BinaryVersion = 1;
+
+	struct MeshBinHeader
+	{
+		// シグネチャ
+		char mSignature[4] = {'G', 'M', 'S', 'H'};
+
+		// バージョン
+		uint32_t mVersion = BinaryVersion;
+
+		// 頂点フォーマット
+		VertexArray::Layout mLayout = VertexArray::PosNormTex;
+
+		// テクスチャ数
+		uint32_t mNumTextures = 0;
+		uint32_t mNumVerts = 0;
+		uint32_t mNumIndices = 0;
+
+		// プロパティ
+		float mRadius = 0.0f;
+		float mSpecPower = 100.0f;
+	};
+}
+
 class Mesh
 {
 public:
@@ -32,18 +64,6 @@ public:
 		mRadius = radius;
 		mSpecPower = specPower;
 	}
-
-	// バイナリ形式でメッシュを保存
-	void SaveBinary(
-		const std::string &fileName,
-		const void *verts,
-		uint32_t numVerts,
-		VertexArray::Layout layout,
-		const uint32_t *indices,
-		uint32_t numIndices,
-		const std::vector<std::string> &textureNames,
-		float radius,
-		float specPower);
 
 	// ゲッター
 	ResourceID GetTexture(size_t index) const { return mTextures[index]; }

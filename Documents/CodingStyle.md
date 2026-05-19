@@ -11,3 +11,4 @@
 | 列挙型名 | PascalCase |
 | 列挙子 | E + PascalCase |
 | 定数 / マクロ | SCREAMING_SNAKE_CASE|
+| 名前空間 | PascalCase |
