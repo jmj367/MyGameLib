@@ -9,7 +9,8 @@ class JsonData
 {
 public:
     // JSONファイルのロード
-    static bool LoadJSON(const std::string &fileName, JsonData &outData);
+    bool LoadJSON(const std::string &fileName);
+    bool SaveJSON(const std::string &fileName);
 
     // JSON配列、JSONオブジェクトからJsonDataを作成する
     bool CreateJsonData(const JsonArray &jsonArray);

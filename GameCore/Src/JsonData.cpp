@@ -1,8 +1,10 @@
 #include "JsonData.h"
 #include <fstream>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/prettywriter.h>
 #include <vector>
 
-bool JsonData::LoadJSON(const std::string &fileName, JsonData &outData)
+bool JsonData::LoadJSON(const std::string &fileName)
 {
     // JSONファイルを読み込む
     // ファイルサイズを取得するために読み取り位置を末尾に設定
@@ -22,8 +24,8 @@ bool JsonData::LoadJSON(const std::string &fileName, JsonData &outData)
     file.read(bytes.data(), static_cast<size_t>(fileSize));
 
     // 文字列をRapidJSON Doccumentに変換
-    outData.mDocument.Parse(bytes.data());
-    if (!outData.mDocument.IsObject())
+    mDocument.Parse(bytes.data());
+    if (!mDocument.IsObject())
     {
         return false;
     }
@@ -31,22 +33,50 @@ bool JsonData::LoadJSON(const std::string &fileName, JsonData &outData)
     return true;
 }
 
+bool JsonData::SaveJSON(const std::string &fileName)
+{
+    rapidjson::StringBuffer buffer;
+    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+
+    std::ofstream file(fileName);
+    if (!file.is_open())
+    {
+        return false;
+    }
+
+    mDocument.Accept(writer);
+    file << buffer.GetString();
+    return true;
+}
+
+bool JsonData::CreateJsonData(const JsonArray &jsonArray)
+{
+    mDocument.SetArray();
+    for (size_t i = 0; i < jsonArray.GetValuePtr()->Size(); i++)
+    {
+        mDocument.PushBack(jsonArray.GetValuePtr()->operator[](i), mDocument.GetAllocator());
+    }
+
+    return true;
+}
+
+bool JsonData::CreateJsonData(const JsonObject &jsonObject)
+{
+    mDocument.SetObject();
+    for (auto iter = jsonObject.GetValuePtr()->MemberBegin(); iter != jsonObject.GetValuePtr()->MemberEnd(); iter++)
+    {
+        mDocument.AddMember(iter->name, iter->value, mDocument.GetAllocator());
+    }
+
+    return true;
+}
+
 const JsonObject JsonData::GetObject()
 {
-    // 値をコピーして渡す
-    rapidjson::Document::AllocatorType &allocator = mDocument.GetAllocator();
-    rapidjson::Value value;
-    value.CopyFrom(mDocument, allocator);
-
-    return JsonObject(value);
+    return JsonObject(&mDocument);
 }
 
 const JsonArray JsonData::GetArray()
 {
-    // 値をコピーして渡す
-    rapidjson::Document::AllocatorType &allocator = mDocument.GetAllocator();
-    rapidjson::Value value;
-    value.CopyFrom(mDocument, allocator);
-
-    return JsonArray(value);
+    return JsonArray(&mDocument);
 }

@@ -296,7 +296,7 @@ bool LoaderModel::LoadMeshJson(JsonObject* data, Mesh &mesh, Renderer *renderer)
 bool LoaderModel::LoadMeshJson(const std::string &fileName, Mesh &mesh, Renderer *renderer)
 {
     JsonData data;
-    if (!JsonData::LoadJSON(fileName, data))
+    if (!data.LoadJSON(fileName))
     {
         return false;
     }
@@ -469,7 +469,7 @@ bool LoaderModel::LoadSkeletonJson(JsonObject* data, Skeleton &skeleton)
 bool LoaderModel::LoadSkeletonJson(const std::string &fileName, Skeleton &skeleton)
 {
     JsonData data;
-    if (!JsonData::LoadJSON(fileName, data))
+    if (!data.LoadJSON(fileName))
     {
         return false;
     }
