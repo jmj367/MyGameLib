@@ -449,6 +449,54 @@ bool LoaderModel::LoadSkeletonJson(const std::string &fileName, Skeleton &skelet
 
 bool LoaderModel::LoadSkeletonBinary(const std::string &fileName, Skeleton &skeleton)
 {
-    // TODO: 実装
-    return false;
+    std::ifstream file(fileName, std::ios::in | std::ios::binary);
+    if (!file.is_open())
+    {
+        return false;
+    }
+
+    // ヘッダーの読み込み
+    SkeletonBinary::SkeletonBinHeader header;
+    file.read(reinterpret_cast<char*>(&header), sizeof(header));
+
+    // シグネチャの確認
+    char* sig = header.mSignature;
+    if (sig[0] != 'G' || sig[1] != 'S' || sig[2] != 'K' || sig[3] != 'L')
+    {
+        return false;
+    }
+
+    // ボーンデータの読み込み
+    std::vector<Skeleton::Bone> bones(header.mNumBones);
+    for(size_t i = 0; i < header.mNumBones; i++)
+    {
+        // 名前の読み込み
+        uint16_t nameSize = 0;
+        file.read(reinterpret_cast<char*>(&nameSize), sizeof(nameSize));
+        char* name = new char[nameSize];
+        file.read(name, nameSize);
+        bones[i].Name = name;
+        delete[] name;
+
+        // 親の読み込み
+        file.read(reinterpret_cast<char*>(&bones[i].Parent), sizeof(bones[i].Parent));
+
+        // ローカルバインドポーズの読み込み
+        Quaternion rot;
+        file.read(reinterpret_cast<char*>(&rot), sizeof(rot));
+        bones[i].LocalBindPose.mRotation = rot;
+
+        Vector3 trans;
+        file.read(reinterpret_cast<char*>(&trans), sizeof(trans));
+        bones[i].LocalBindPose.mTranslation = trans;
+    }
+
+    // 親と子の対応
+    std::unordered_map<int, std::vector<int>> boneChildrenIndex;
+    for (size_t i = 0; i < bones.size(); i++)
+    {
+        boneChildrenIndex[bones[i].Parent].push_back(static_cast<int>(i));
+    }
+
+    return skeleton.Initialize(bones, boneChildrenIndex);
 }
