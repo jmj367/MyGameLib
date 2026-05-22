@@ -24,6 +24,9 @@ public:
 		const unsigned int* indices, unsigned int numIndices);
 	~VertexArray();
 
+	void* GetVertexBuffer() const;
+	void* GetIndexBuffer() const;
+
 	void SetActive();
 	unsigned int GetNumIndices() const { return mNumIndices; }
 	unsigned int GetNumVerts() const { return mNumVerts; }

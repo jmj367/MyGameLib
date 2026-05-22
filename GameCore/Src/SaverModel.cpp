@@ -81,13 +81,17 @@ bool SaverModel::SaveMeshBinary(const std::string &fileName, Mesh &mesh, Rendere
 
         // 頂点サイズの取得
         unsigned vertexSize = VertexArray::GetVertexSize(mesh.GetVertexArray()->GetLayout());
+
         // 頂点の書き込み
-        outFile.write(reinterpret_cast<const char *>(mesh.GetVertexArray()->GetVertexBuffer()),
-                      mesh.GetVertexArray()->GetNumVerts() * vertexSize);
+        char* vertData = static_cast<char*>(mesh.GetVertexArray()->GetVertexBuffer());
+        outFile.write(vertData, mesh.GetVertexArray()->GetNumVerts() * vertexSize);
+
         // インデックスの書き込み
-        outFile.write(reinterpret_cast<const char *>(mesh.GetVertexArray()->GetIndexBuffer()),
-                      mesh.GetVertexArray()->GetNumIndices() * sizeof(uint32_t));
+        uint32_t* indexData = static_cast<uint32_t*>(mesh.GetVertexArray()->GetIndexBuffer());
+        outFile.write(reinterpret_cast<const char*>(indexData), mesh.GetVertexArray()->GetNumIndices() * sizeof(uint32_t));
     }
+
+    return true;
 }
 
 bool SaverModel::SaveSkeletonJson(const std::string &fileName, Skeleton &skeleton, Renderer *renderer)
