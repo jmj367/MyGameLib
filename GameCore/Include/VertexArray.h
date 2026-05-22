@@ -24,13 +24,13 @@ public:
 				const unsigned int *indices, unsigned int numIndices);
 	~VertexArray();
 
-	void *GetVertexBuffer() const;
-	void *GetIndexBuffer() const;
+	void *GetVertexBuffer	() const;
+	void *GetIndexBuffer	() const;
 
 	void SetActive();
 
-	unsigned int GetNumIndices() const { return mNumIndices; }
-	unsigned int GetNumVerts() const { return mNumVerts; }
+	unsigned int GetNumIndices	() const { return mNumIndices	; }
+	unsigned int GetNumVerts	() const { return mNumVerts		; }
 	Layout GetLayout() const { return mLayout; }
 	std::string GetLayoutName() const { return mLayout == PosNormTex ? "PosNormTex" : "PosNormSkinTex"; }
 	static unsigned int GetVertexSize(VertexArray::Layout layout);

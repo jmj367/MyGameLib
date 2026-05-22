@@ -24,8 +24,8 @@ public:
 	void SetActive();
 
 	// 行列の引き渡し
-	void SetMatrixUniform(const char *name, const Matrix4 &matrix);
-	void SetMatrixUniforms(const char *name, Matrix4 *matrices, unsigned count);
+	void SetMatrixUniform	(const char *name, const 	Matrix4 &matrix);
+	void SetMatrixUniforms	(const char *name, 			Matrix4 *matrices, unsigned count);
 	// ベクトルの引き渡し
 	void SetVector3Uniform(const char *name, const Vector3 &vector);
 	void SetVector2Uniform(const char *name, const Vector2 &vector);
@@ -35,8 +35,8 @@ public:
 	void SetIntUniform(const char *name, int value);
 
 	// ゲッター
-	const std::string &GetVertexShaderFileName() const { return mVertexShaderFileName; }
-	const std::string &GetFragmentShaderFileName() const { return mFragmentShaderFileName; }
+	const std::string &GetVertexShaderFileName	() const { return mVertexShaderFileName		; }
+	const std::string &GetFragmentShaderFileName() const { return mFragmentShaderFileName	; }
 
 private:
 	// シェーダーのコンパイル

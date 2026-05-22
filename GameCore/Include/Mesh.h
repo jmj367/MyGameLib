@@ -1,11 +1,3 @@
-// ----------------------------------------------------------------
-// From Game Programming in C++ by Sanjay Madhav
-// Copyright (C) 2017 Sanjay Madhav. All rights reserved.
-//
-// Released under the BSD License
-// See LICENSE in root directory for full details.
-// ----------------------------------------------------------------
-
 #pragma once
 #include "VertexArray.h"
 #include <cstdint>
@@ -34,13 +26,13 @@ namespace MeshBinary
 		VertexArray::Layout mLayout = VertexArray::PosNormTex;
 
 		// テクスチャ数
-		uint32_t mNumTextures = 0;
-		uint32_t mNumVerts = 0;
-		uint32_t mNumIndices = 0;
+		uint32_t mNumTextures 	= 0;
+		uint32_t mNumVerts 		= 0;
+		uint32_t mNumIndices 	= 0;
 
 		// プロパティ
-		float mRadius = 0.0f;
-		float mSpecPower = 100.0f;
+		float mRadius 		= 0.0f;
+		float mSpecPower 	= 100.0f;
 	};
 }
 
@@ -53,26 +45,30 @@ public:
 	~Mesh();
 
 	void Initialize(
-		const std::vector<ResourceID> &textures,
-		VertexArray &vertexArray,
-		const std::string &shaderName,
-		float radius, float specPower)
+		const 	std::vector<ResourceID> &textures,
+				VertexArray 			&vertexArray,
+		const 	std::string 			&shaderName,
+		float 							radius, 
+		float 							specPower)
 	{
-		mTextures = textures;
-		mVertexArray = vertexArray;
-		mShaderName = shaderName;
-		mRadius = radius;
-		mSpecPower = specPower;
+		mTextures 		= textures		;
+		mVertexArray 	= vertexArray	;
+		mShaderName 	= shaderName	;
+		mRadius 		= radius		;
+		mSpecPower 		= specPower		;
 	}
 
 	// ゲッター
-	ResourceID GetTexture(size_t index) const { return mTextures[index]; }
+	ResourceID 	GetTexture		(size_t index) 	const { return mTextures[index]; }
+	size_t 		GetNumTextures	() 				const { return mTextures.size(); }
+
 	VertexArray *GetVertexArray() { return &mVertexArray; }
-	const std::string &GetShaderName() const { return mShaderName; }
-	const std::string &GetFileName() const { return mFileName; }
-	float GetRadius() const { return mRadius; }
-	float GetSpecPower() const { return mSpecPower; }
-	size_t GetNumTextures() const { return mTextures.size(); }
+
+	const std::string &GetShaderName() const { return mShaderName	; }
+	const std::string &GetFileName	() const { return mFileName		; }
+
+	float GetRadius		() const { return mRadius	; }
+	float GetSpecPower	() const { return mSpecPower; }
 
 private:
 	// メッシュに関連付けられたテクスチャ群
