@@ -4,6 +4,29 @@
 #include <vector>
 #include <unordered_map>
 
+namespace SkeletonBinary
+{
+	union BoneIndex
+	{
+		uint32_t i;
+		uint8_t b[4];
+	};
+
+	const int BinaryVersion = 1;
+
+	struct SkeletonBinHeader
+	{
+		// シグネチャ
+		char mSignature[4] = {'G', 'S', 'K', 'L'};
+
+		// バージョン
+		uint32_t mVersion = BinaryVersion;
+
+		// ボーン数
+		uint32_t mNumBones = 0;
+	};
+}
+
 class Skeleton
 {
 public:
