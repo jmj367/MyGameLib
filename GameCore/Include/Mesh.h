@@ -1,4 +1,6 @@
 #pragma once
+
+#include "Define.h"
 #include "VertexArray.h"
 #include <cstdint>
 #include <vector>
@@ -39,8 +41,6 @@ namespace MeshBinary
 class Mesh
 {
 public:
-	using ResourceID = size_t;
-
 	Mesh();
 	~Mesh();
 

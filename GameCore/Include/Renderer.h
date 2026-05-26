@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Define.h"
 #include "Math.h"
 #include "MatrixPalette.h"
 #include <mutex>
@@ -13,8 +14,6 @@ class RendererBackend;
 class Renderer
 {
 public:
-	using ResourceID = size_t;
-
 	// APIの種類
 	enum class GraphicsAPI
 	{

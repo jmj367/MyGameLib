@@ -1,3 +1,6 @@
+#pragma once
+
+#include "Define.h"
 #include "Math.h"
 #include "MatrixPalette.h"
 #include "Renderer.h"
@@ -18,14 +21,14 @@ public:
     virtual void Shutdown   () = 0;
 
     // リソースの取得/解放
-	virtual bool GetTexture     (const std::string &fileName, Renderer::ResourceID& outID) = 0;
-	virtual bool GetMesh        (const std::string &fileName, Renderer::ResourceID& outID) = 0;
-	virtual bool GetSkeleton    (const std::string &fileName, Renderer::ResourceID& outID) = 0;
-	virtual bool GetShader      (const std::string &vertexShaderFileName, const std::string &fragmentShaderFileName, Renderer::ResourceID& outID) = 0;
-	virtual void ReleaseTexture (Renderer::ResourceID textureID ) = 0;
-	virtual void ReleaseMesh    (Renderer::ResourceID meshID    ) = 0;
-	virtual void ReleaseSkeleton(Renderer::ResourceID skeletonID) = 0;
-	virtual void ReleaseShader  (Renderer::ResourceID shaderID  ) = 0;
+	virtual bool GetTexture     (const std::string &fileName, ResourceID& outID) = 0;
+	virtual bool GetMesh        (const std::string &fileName, ResourceID& outID) = 0;
+	virtual bool GetSkeleton    (const std::string &fileName, ResourceID& outID) = 0;
+	virtual bool GetShader      (const std::string &vertexShaderFileName, const std::string &fragmentShaderFileName, ResourceID& outID) = 0;
+	virtual void ReleaseTexture (ResourceID textureID ) = 0;
+	virtual void ReleaseMesh    (ResourceID meshID    ) = 0;
+	virtual void ReleaseSkeleton(ResourceID skeletonID) = 0;
+	virtual void ReleaseShader  (ResourceID shaderID  ) = 0;
 	virtual void ReleaseAllResources() = 0;
 
     // フレーム描画

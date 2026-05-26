@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Mesh.h"
 #include "Skeleton.h"
 #include "VertexArray.h"

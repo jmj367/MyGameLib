@@ -1,4 +1,5 @@
 #include "JsonData.h"
+#include "Define.h"
 #include "LoaderModel.h"
 #include "MatrixPalette.h"
 #include "Renderer.h"
@@ -85,7 +86,7 @@ bool LoaderModel::LoadMeshJson(JsonObject* data, Mesh &mesh, Renderer *renderer)
     }
 
     // テクスチャの読み込み
-    std::vector<Mesh::ResourceID> textureIDs;
+    std::vector<ResourceID> textureIDs;
     JsonArray textures;
     if (!data->Get("textures", textures) || textures.Size() < 1)
     {
@@ -108,7 +109,7 @@ bool LoaderModel::LoadMeshJson(JsonObject* data, Mesh &mesh, Renderer *renderer)
             return false;
         }
         textureNames.push_back(texName);
-        Mesh::ResourceID t;
+        ResourceID t;
         if (!renderer->GetTexture(texName, t))
         {
             return false;
@@ -294,7 +295,7 @@ bool LoaderModel::LoadMeshBinary(const std::string &fileName, Mesh &mesh, Render
     }
 
     // テクスチャの読み込み
-    std::vector<Mesh::ResourceID> textureIDs;
+    std::vector<ResourceID> textureIDs;
     for(int i = 0; i < header.mNumTextures; i++)
     {
         uint16_t nameSize = 0;
@@ -305,7 +306,7 @@ bool LoaderModel::LoadMeshBinary(const std::string &fileName, Mesh &mesh, Render
         file.read(texName, nameSize);
 
         // テクスチャの取得
-        Mesh::ResourceID t;
+        ResourceID t;
         if (!renderer->GetTexture(texName, t))
         {
             delete[] texName;
