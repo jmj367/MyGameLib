@@ -3,16 +3,18 @@
 #include "Shader.h"
 #include "Skeleton.h"
 #include "Texture.h"
+#include "VertexArray.h"
+#include <SDL2/SDL.h>
 
 class OpenGLRendererBackend : public RendererBackend
 {
 public:
-    OpenGLRendererBackend(Renderer *renderer);
+    OpenGLRendererBackend();
     ~OpenGLRendererBackend() override;
 
+    bool PrepareWindow() override;
     bool Initialize(void *windowHandle, float screenWidth, float screenHeight) override;
     void Shutdown() override;
-    void Draw() override;
 
     // リソースの取得/解放
     bool GetTexture     (const std::string &fileName, Renderer::ResourceID &outID) override;
@@ -33,4 +35,7 @@ private:
     std::unordered_map<Renderer::ResourceID, Mesh       > mMeshes;
     std::unordered_map<Renderer::ResourceID, Skeleton   > mSkeletons;
     std::unordered_map<Renderer::ResourceID, Shader     > mShaders;
+
+    // OpenGLのコンテキスト
+    SDL_GLContext mGLContext;
 };

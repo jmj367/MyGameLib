@@ -13,9 +13,9 @@ class RendererBackend
 public:
     virtual ~RendererBackend() = default;
 
+    virtual bool PrepareWindow() = 0; // ウィンドウ作成前の初期化処理(必要なら)
     virtual bool Initialize(void* windowHandle, float screenWidth, float screenHeight) = 0;
     virtual void Shutdown   () = 0;
-    virtual void Draw       () = 0;
 
     // リソースの取得/解放
 	virtual bool GetTexture     (const std::string &fileName, Renderer::ResourceID& outID) = 0;
@@ -40,6 +40,7 @@ public:
         const std::vector<Renderer::SpotLightDrawInfo       > &SpotLightDrawInfos         ;
         const std::vector<Renderer::DirectionalLightDrawInfo> &DirectionalLightDrawInfos  ;
         const std::vector<Renderer::AmbientLightDrawInfo    > &AmbientLightDrawInfos      ;
+        const std::vector<Renderer::PostProcessDrawInfo     > &PostProcessDrawInfos       ;
     };
     virtual void DrawFrame(const FrameDrawInfo& drawInfo) = 0;
 };

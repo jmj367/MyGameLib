@@ -24,6 +24,7 @@ public:
 	Renderer(class Game *game);
 	virtual ~Renderer();
 
+	virtual bool PrepareWindow(); // ウィンドウ作成前の初期化処理(必要なら)
 	virtual bool Initialize(void* windowHandle, float screenWidth, float screenHeight, GraphicsAPI apiType = GraphicsAPI::OpenGL);
 	virtual void Shutdown();
 	virtual void Draw();
@@ -110,6 +111,14 @@ public:
 	// 環境光の描画コマンドを送信
 	void DrawAmbientLight(const AmbientLightDrawInfo &ambientLight);
 
+	// ポストプロセスの構造体(一応構造体にしておく)
+	struct PostProcessDrawInfo
+	{
+		ResourceID ShaderID;
+	};
+	// ポストプロセスの描画コマンドを送信
+	void DrawPostProcess(const PostProcessDrawInfo &postProcessInfo);
+
 	// リソースの取得/解放
 	bool GetTexture		(const std::string &fileName, ResourceID& outID);
 	bool GetMesh		(const std::string &fileName, ResourceID& outID);
@@ -158,30 +167,32 @@ private:
 	ResourceID mNextResourceID;
 
 	// リソース検索用マップ
-	std::unordered_map<std::string, ResourceID> mTextureFileNameToID;
-	std::unordered_map<std::string, ResourceID> mMeshFileNameToID;
-	std::unordered_map<std::string, ResourceID> mSkeletonFileNameToID;
+	std::unordered_map<std::string, ResourceID> mTextureFileNameToID	;
+	std::unordered_map<std::string, ResourceID> mMeshFileNameToID		;
+	std::unordered_map<std::string, ResourceID> mSkeletonFileNameToID	;
 	std::unordered_map<std::pair<std::string, std::string>, ResourceID> mShaderFileNameToID;
 
 	// バックエンドのインスタンス
 	std::unique_ptr<RendererBackend> mBackend;
 
 	// 描画コマンド
-	std::vector<SpriteDrawInfo> 			mSpriteDrawList;
-	std::vector<MeshDrawInfo> 				mMeshDrawList;
-	std::vector<SkinnedMeshDrawInfo> 		mSkinnedMeshDrawList;
-	std::vector<PointLightDrawInfo> 		mPointLightDrawList;
-	std::vector<SpotLightDrawInfo> 			mSpotLightDrawList;
+	std::vector<SpriteDrawInfo> 			mSpriteDrawList				;
+	std::vector<MeshDrawInfo> 				mMeshDrawList				;
+	std::vector<SkinnedMeshDrawInfo> 		mSkinnedMeshDrawList		;
+	std::vector<PointLightDrawInfo> 		mPointLightDrawList			;
+	std::vector<SpotLightDrawInfo> 			mSpotLightDrawList			;
 	// ディレクショナルライトと環境光は数が少ないことが想定されるが、一応描画コマンドのリストにしておく
-	std::vector<DirectionalLightDrawInfo> 	mDirectionalLightDrawList;
-	std::vector<AmbientLightDrawInfo> 		mAmbientLightDrawList;
+	std::vector<DirectionalLightDrawInfo> 	mDirectionalLightDrawList	;
+	std::vector<AmbientLightDrawInfo> 		mAmbientLightDrawList		;
+	std::vector<PostProcessDrawInfo> 		mPostProcessDrawList		;
 
 	// 描画コマンドのロック
-	std::mutex mSpriteDrawListMutex;
-	std::mutex mMeshDrawListMutex;
-	std::mutex mSkinnedMeshDrawListMutex;
-	std::mutex mPointLightDrawListMutex;
-	std::mutex mSpotLightDrawListMutex;
-	std::mutex mDirectionalLightDrawListMutex;
-	std::mutex mAmbientLightDrawListMutex;
+	std::mutex mSpriteDrawListMutex				;
+	std::mutex mMeshDrawListMutex				;
+	std::mutex mSkinnedMeshDrawListMutex		;
+	std::mutex mPointLightDrawListMutex			;
+	std::mutex mSpotLightDrawListMutex			;
+	std::mutex mDirectionalLightDrawListMutex	;
+	std::mutex mAmbientLightDrawListMutex		;
+	std::mutex mPostProcessDrawListMutex		;
 };

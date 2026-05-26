@@ -15,6 +15,12 @@ Renderer::~Renderer()
 {
 }
 
+bool Renderer::PrepareWindow()
+{
+    // バックエンドのウィンドウ準備
+    return mBackend->PrepareWindow();
+}
+
 bool Renderer::Initialize(void* windowHandle, float screenWidth, float screenHeight, GraphicsAPI apiType)
 {
     mScreenWidth = screenWidth;
