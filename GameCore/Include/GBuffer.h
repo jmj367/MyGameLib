@@ -1,4 +1,6 @@
 #pragma once
+
+#include "Define.h"
 #include <vector>
 
 class GBuffer
@@ -21,16 +23,13 @@ public:
 	void Destroy();
 	
 	// 指定した種類のテクスチャを取得
-	class Texture* GetTexture(Type type);
-
-	// Gバッファのテクスチャをアクティブにする
-	void SetTexturesActive();
+	ResourceID GetTexture(Type type);
 
 	// ゲッター
 	unsigned int GetBufferID() const { return mBufferID; }
 private:
 	// Gバッファ用テクスチャ群
-	std::vector<class Texture*> mTextures;
-	// フレームバッファID
+	std::vector<ResourceID> mTextures;
+	// バッファID
 	unsigned int mBufferID;
 };
