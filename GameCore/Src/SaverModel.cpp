@@ -21,7 +21,7 @@ bool SaverModel::SaveMeshJson(const std::string &fileName, Mesh &mesh, Renderer 
     {
         // テクスチャIDからテクスチャ名を取得
         std::string texName;
-        if (!renderer->GetTexture(mesh.GetTexture(i), texName))
+        if (!renderer->GetTextureName(mesh.GetTexture(i), texName))
         {
             return false;
         }
@@ -73,7 +73,7 @@ bool SaverModel::SaveMeshBinary(const std::string &fileName, Mesh &mesh, Rendere
     {
         // テクスチャIDからテクスチャ名を取得
         std::string texName;
-        if (!renderer->GetTexture(mesh.GetTexture(i), texName))
+        if (!renderer->GetTextureName(mesh.GetTexture(i), texName))
         {
             return false;
         }

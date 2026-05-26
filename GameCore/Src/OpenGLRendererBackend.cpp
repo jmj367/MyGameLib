@@ -48,11 +48,74 @@ bool OpenGLRendererBackend::Initialize(void *windowHandle, float screenWidth, fl
     // これをクリアしておく
     glGetError();
 
+    // Gバッファの初期化
+    int width = static_cast<int>(screenWidth);
+    int height = static_cast<int>(screenHeight);
+    if(!mGBuffer.Create(width, height))
+    {
+        return false;
+    }
+
     return true;
 }
 
 void OpenGLRendererBackend::Shutdown()
 {
-    // OpenGLのシャットダウン処理をここに記述
-    // 例えば、リソースの解放など
+    // Gバッファの破棄
+    mGBuffer.Destroy();
+
+    // コンテキストの破棄
+    SDL_GL_DeleteContext(mGLContext);
+}
+
+bool OpenGLRendererBackend::GetTexture(const std::string &fileName, ResourceID &outID)
+{
+    // キャッシュに存在するか
+    for (const auto &pair : mTextures)
+    {
+        if (pair.second.GetFileName() == fileName)
+        {
+            outID = pair.first;
+            return true;
+        }
+    }
+
+    // キャッシュに存在しない場合は新規ロード
+    Texture texture;
+    if (!texture.Load(fileName))
+    {
+        return false;
+    }
+
+    // キャッシュに追加
+    outID = mNextResourceID++;
+    mTextures.emplace(outID, std::move(texture));
+
+    return true;
+}
+
+bool OpenGLRendererBackend::GetMesh(const std::string &fileName, ResourceID &outID)
+{
+    // キャッシュに存在するか
+    for (const auto &pair : mMeshes)
+    {
+        if (pair.second.GetFileName() == fileName)
+        {
+            outID = pair.first;
+            return true;
+        }
+    }
+
+    // キャッシュに存在しない場合は新規ロード
+    Mesh mesh;
+    if (!mesh.Load(fileName, GetRenderer()))
+    {
+        return false;
+    }
+
+    // キャッシュに追加
+    outID = mNextResourceID++;
+    mMeshes.emplace(outID, std::move(mesh));
+
+    return true;
 }

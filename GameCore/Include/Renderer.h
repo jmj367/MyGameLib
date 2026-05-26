@@ -134,10 +134,10 @@ public:
 	void ReleaseAllResources();
 
 	// リソースIDからリソース名を取得
-	bool GetTexture	(ResourceID textureID	, std::string &outFileName);
-	bool GetMesh	(ResourceID meshID		, std::string &outFileName);
-	bool GetSkeleton(ResourceID skeletonID	, std::string &outFileName);
-	bool GetShader	(ResourceID shaderID	, std::string &outVertexShaderFileName, std::string &outFragmentShaderFileName);
+	bool GetTextureName	(ResourceID textureID	, std::string &outFileName);
+	bool GetMeshName	(ResourceID meshID		, std::string &outFileName);
+	bool GetSkeletonName(ResourceID skeletonID	, std::string &outFileName);
+	bool GetShaderName	(ResourceID shaderID	, std::string &outVertexShaderFileName, std::string &outFragmentShaderFileName);
 
 	// スクリーンサイズのゲッター
 	float GetScreenWidth	() const { return mScreenWidth	; }
@@ -162,14 +162,11 @@ private:
 	Matrix4 mViewMat;
 	Matrix4 mProjMat;
 
-	// リソースIDの管理
-	ResourceID mNextResourceID;
-
 	// リソース検索用マップ
 	std::unordered_map<std::string, ResourceID> mTextureFileNameToID	;
 	std::unordered_map<std::string, ResourceID> mMeshFileNameToID		;
 	std::unordered_map<std::string, ResourceID> mSkeletonFileNameToID	;
-	std::unordered_map<std::pair<std::string, std::string>, ResourceID> mShaderFileNameToID;
+	std::unordered_map<std::pair<std::string, std::string>, ResourceID, pair_hash> mShaderFileNameToID;
 
 	// バックエンドのインスタンス
 	std::unique_ptr<RendererBackend> mBackend;

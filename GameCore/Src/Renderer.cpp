@@ -59,7 +59,8 @@ void Renderer::Draw()
         mPointLightDrawList,
         mSpotLightDrawList,
         mDirectionalLightDrawList,
-        mAmbientLightDrawList
+        mAmbientLightDrawList,
+        mPostProcessDrawList
     };
 
     // 描画
@@ -93,6 +94,10 @@ void Renderer::Draw()
     {
         std::lock_guard<std::mutex> lock(mAmbientLightDrawListMutex);
         mAmbientLightDrawList.clear();
+    }
+    {
+        std::lock_guard<std::mutex> lock(mPostProcessDrawListMutex);
+        mPostProcessDrawList.clear();
     }
 }
 
@@ -146,22 +151,78 @@ void Renderer::DrawAmbientLight(const AmbientLightDrawInfo &ambientLight)
 
 bool Renderer::GetTexture(const std::string &fileName, ResourceID &outID)
 {
-    return mBackend->GetTexture(fileName, outID);
+    // すでに取得している場合はIDを返す
+    auto iter = mTextureFileNameToID.find(fileName);
+    if (iter != mTextureFileNameToID.end())
+    {
+        outID = iter->second;
+        return true;
+    }
+
+    // バックエンドにリクエストしてIDを取得
+    bool result = mBackend->GetTexture(fileName, outID);
+    if (result)
+    {
+        mTextureFileNameToID[fileName] = outID;
+    }
+    return result;
 }
 
 bool Renderer::GetMesh(const std::string &fileName, ResourceID &outID)
 {
-    return mBackend->GetMesh(fileName, outID);
+    // すでに取得している場合はIDを返す
+    auto iter = mMeshFileNameToID.find(fileName);
+    if (iter != mMeshFileNameToID.end())
+    {
+        outID = iter->second;
+        return true;
+    }
+
+    // バックエンドにリクエストしてIDを取得
+    bool result = mBackend->GetMesh(fileName, outID);
+    if (result)
+    {
+        mMeshFileNameToID[fileName] = outID;
+    }
+    return result;
 }
 
 bool Renderer::GetSkeleton(const std::string &fileName, ResourceID &outID)
 {
-    return mBackend->GetSkeleton(fileName, outID);
+    // すでに取得している場合はIDを返す
+    auto iter = mSkeletonFileNameToID.find(fileName);
+    if (iter != mSkeletonFileNameToID.end())
+    {
+        outID = iter->second;
+        return true;
+    }
+
+    // バックエンドにリクエストしてIDを取得
+    bool result = mBackend->GetSkeleton(fileName, outID);
+    if (result)
+    {
+        mSkeletonFileNameToID[fileName] = outID;
+    }
+    return result;
 }
 
 bool Renderer::GetShader(const std::string &vertexShaderFileName, const std::string &fragmentShaderFileName, ResourceID &outID)
 {
-    return mBackend->GetShader(vertexShaderFileName, fragmentShaderFileName, outID);
+    // すでに取得している場合はIDを返す
+    auto iter = mShaderFileNameToID.find(std::make_pair(vertexShaderFileName, fragmentShaderFileName));
+    if (iter != mShaderFileNameToID.end())
+    {
+        outID = iter->second;
+        return true;
+    }
+
+    // バックエンドにリクエストしてIDを取得
+    bool result = mBackend->GetShader(vertexShaderFileName, fragmentShaderFileName, outID);
+    if (result)
+    {
+        mShaderFileNameToID[std::make_pair(vertexShaderFileName, fragmentShaderFileName)] = outID;
+    }
+    return result;
 }
 
 void Renderer::ReleaseTexture(ResourceID textureID)
@@ -234,7 +295,7 @@ void Renderer::ReleaseAllResources()
     mShaderFileNameToID     .clear();
 }
 
-bool Renderer::GetTexture(ResourceID textureID, std::string &outFileName)
+bool Renderer::GetTextureName(ResourceID textureID, std::string &outFileName)
 {
     for (const auto &pair : mTextureFileNameToID)
     {
@@ -247,7 +308,7 @@ bool Renderer::GetTexture(ResourceID textureID, std::string &outFileName)
     return false;
 }
 
-bool Renderer::GetMesh(ResourceID meshID, std::string &outFileName)
+bool Renderer::GetMeshName(ResourceID meshID, std::string &outFileName)
 {
     for (const auto &pair : mMeshFileNameToID)
     {
@@ -260,7 +321,7 @@ bool Renderer::GetMesh(ResourceID meshID, std::string &outFileName)
     return false;
 }
 
-bool Renderer::GetSkeleton(ResourceID skeletonID, std::string &outFileName)
+bool Renderer::GetSkeletonName(ResourceID skeletonID, std::string &outFileName)
 {
     for (const auto &pair : mSkeletonFileNameToID)
     {
@@ -273,7 +334,7 @@ bool Renderer::GetSkeleton(ResourceID skeletonID, std::string &outFileName)
     return false;
 }
 
-bool Renderer::GetShader(ResourceID shaderID, std::string &outVertexShaderFileName, std::string &outFragmentShaderFileName)
+bool Renderer::GetShaderName(ResourceID shaderID, std::string &outVertexShaderFileName, std::string &outFragmentShaderFileName)
 {
     for (const auto &pair : mShaderFileNameToID)
     {

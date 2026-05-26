@@ -58,6 +58,9 @@ public:
 		mSpecPower 		= specPower		;
 	}
 
+	// メッシュデータをファイルから読み込む
+	bool Load(const std::string &fileName, class Renderer *renderer);
+
 	// ゲッター
 	ResourceID 	GetTexture		(size_t index) 	const { return mTextures[index]; }
 	size_t 		GetNumTextures	() 				const { return mTextures.size(); }

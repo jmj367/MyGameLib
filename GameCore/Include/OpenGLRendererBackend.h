@@ -2,6 +2,7 @@
 
 #include "RendererBackend.h"
 #include "Define.h"
+#include "GBuffer.h"
 #include "Mesh.h"
 #include "Shader.h"
 #include "Skeleton.h"
@@ -39,6 +40,11 @@ private:
     std::unordered_map<ResourceID, Skeleton   > mSkeletons;
     std::unordered_map<ResourceID, Shader     > mShaders;
 
+    // リソースIDの管理
+    ResourceID mNextResourceID;
+
     // OpenGLのコンテキスト
     SDL_GLContext mGLContext;
+    // Gバッファ
+    GBuffer mGBuffer;
 };

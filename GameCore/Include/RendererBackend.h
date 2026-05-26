@@ -14,6 +14,10 @@
 class RendererBackend
 {
 public:
+    RendererBackend(Renderer* renderer)
+        : mRenderer(renderer)
+    {
+    };
     virtual ~RendererBackend() = default;
 
     virtual bool PrepareWindow() = 0; // ウィンドウ作成前の初期化処理(必要なら)
@@ -46,4 +50,10 @@ public:
         const std::vector<Renderer::PostProcessDrawInfo     > &PostProcessDrawInfos       ;
     };
     virtual void DrawFrame(const FrameDrawInfo& drawInfo) = 0;
+
+    Renderer* GetRenderer() const { return mRenderer; }
+
+private:
+    Renderer* mRenderer;
+
 };

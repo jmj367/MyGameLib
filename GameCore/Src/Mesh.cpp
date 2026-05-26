@@ -1,5 +1,6 @@
 #include "Mesh.h"
 #include "JsonData.h"
+#include "LoaderModel.h"
 #include "Math.h"
 #include "Renderer.h"
 #include "Texture.h"
@@ -17,4 +18,9 @@ Mesh::Mesh()
 
 Mesh::~Mesh()
 {
+}
+
+bool Mesh::Load(const std::string &fileName, Renderer *renderer)
+{
+	return LoaderModel::LoadMesh(fileName, *this, renderer);
 }
