@@ -1,4 +1,5 @@
 #include "OpenGLRendererBackend.h"
+#include "LoaderModel.h"
 #include <GL/glew.h>
 
 OpenGLRendererBackend::OpenGLRendererBackend()
@@ -108,7 +109,7 @@ bool OpenGLRendererBackend::GetMesh(const std::string &fileName, ResourceID &out
 
     // キャッシュに存在しない場合は新規ロード
     Mesh mesh;
-    if (!mesh.Load(fileName, GetRenderer()))
+    if (!LoaderModel::LoadMesh(fileName, mesh, GetRenderer()))
     {
         return false;
     }
@@ -118,4 +119,89 @@ bool OpenGLRendererBackend::GetMesh(const std::string &fileName, ResourceID &out
     mMeshes.emplace(outID, std::move(mesh));
 
     return true;
+}
+
+bool OpenGLRendererBackend::GetSkeleton(const std::string &fileName, ResourceID &outID)
+{
+    // キャッシュに存在するか
+    for (const auto &pair : mSkeletons)
+    {
+        if (pair.second.GetFileName() == fileName)
+        {
+            outID = pair.first;
+            return true;
+        }
+    }
+
+    // キャッシュに存在しない場合は新規ロード
+    Skeleton skeleton;
+    if (!LoaderModel::LoadSkeleton(fileName, skeleton))
+    {
+        return false;
+    }
+
+    // キャッシュに追加
+    outID = mNextResourceID++;
+    mSkeletons.emplace(outID, std::move(skeleton));
+
+    return true;
+}
+
+bool OpenGLRendererBackend::GetShader(const std::string &vertexShaderFileName, const std::string &fragmentShaderFileName, ResourceID &outID)
+{
+    // キャッシュに存在するか
+    for (const auto &pair : mShaders)
+    {
+        if (pair.second.GetVertexShaderFileName() == vertexShaderFileName &&
+            pair.second.GetFragmentShaderFileName() == fragmentShaderFileName)
+        {
+            outID = pair.first;
+            return true;
+        }
+    }
+
+    // キャッシュに存在しない場合は新規ロード
+    Shader shader;
+    if (!shader.Load(vertexShaderFileName, fragmentShaderFileName))
+    {
+        return false;
+    }
+
+    // キャッシュに追加
+    outID = mNextResourceID++;
+    mShaders.emplace(outID, std::move(shader));
+
+    return true;
+}
+
+void OpenGLRendererBackend::ReleaseTexture(ResourceID textureID)
+{
+    mTextures.erase(textureID);
+}
+
+void OpenGLRendererBackend::ReleaseMesh(ResourceID meshID)
+{
+    mMeshes.erase(meshID);
+}
+
+void OpenGLRendererBackend::ReleaseSkeleton(ResourceID skeletonID)
+{
+    mSkeletons.erase(skeletonID);
+}
+
+void OpenGLRendererBackend::ReleaseShader(ResourceID shaderID)
+{
+    mShaders.erase(shaderID);
+}
+
+void OpenGLRendererBackend::ReleaseAllResources()
+{
+    mTextures   .clear();
+    mMeshes     .clear();
+    mSkeletons  .clear();
+    mShaders    .clear();
+}
+
+void OpenGLRendererBackend::DrawFrame(const FrameDrawInfo &drawInfo)
+{
 }
