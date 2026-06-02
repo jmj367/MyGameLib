@@ -31,18 +31,6 @@ public:
 	// 各種描画コマンドの構造体と送信関数
 	// RendererBackendをラップする
 
-	// スプライト描画の為の構造体
-	struct SpriteDrawInfo
-	{
-		size_t 		TextureID;
-		Vector2 	TextureSize;
-		Matrix4 	WorldTransform;
-		ResourceID 	ShaderID;
-		int 		DrawOrder;
-	};
-	// スプライトの描画コマンドを送信
-	void DrawSprite(const SpriteDrawInfo &spriteInfo);
-
 	// メッシュ描画の為の構造体
 	struct MeshDrawInfo
 	{
@@ -110,6 +98,18 @@ public:
 	// 環境光の描画コマンドを送信
 	void DrawAmbientLight(const AmbientLightDrawInfo &ambientLight);
 
+	// スプライト描画の為の構造体
+	struct SpriteDrawInfo
+	{
+		size_t 		TextureID;
+		Vector2 	TextureSize;
+		Matrix4 	WorldTransform;
+		ResourceID 	ShaderID;
+		int 		DrawOrder;
+	};
+	// スプライトの描画コマンドを送信
+	void DrawSprite(const SpriteDrawInfo &spriteInfo);
+
 	// ポストプロセスの構造体(一応構造体にしておく)
 	struct PostProcessDrawInfo
 	{
@@ -117,6 +117,8 @@ public:
 	};
 	// ポストプロセスの描画コマンドを送信
 	void DrawPostProcess(const PostProcessDrawInfo &postProcessInfo);
+
+
 
 	// リソースの取得/解放
 	bool GetTexture		(const std::string &fileName, ResourceID& outID);

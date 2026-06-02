@@ -57,6 +57,9 @@ bool OpenGLRendererBackend::Initialize(void *windowHandle, float screenWidth, fl
         return false;
     }
 
+    mScreenWidth = screenWidth;
+    mScreenHeight = screenHeight;
+
     return true;
 }
 
@@ -108,6 +111,7 @@ bool OpenGLRendererBackend::GetMesh(const std::string &fileName, ResourceID &out
     }
 
     // キャッシュに存在しない場合は新規ロード
+    // NOTE: MeshのロードにRendererが要る
     Mesh mesh;
     if (!LoaderModel::LoadMesh(fileName, mesh, GetRenderer()))
     {
@@ -204,4 +208,22 @@ void OpenGLRendererBackend::ReleaseAllResources()
 
 void OpenGLRendererBackend::DrawFrame(const FrameDrawInfo &drawInfo)
 {
+
+}
+
+void OpenGLRendererBackend::DrawMesh(const FrameDrawInfo &drawInfo)
+{
+    // バッファのクリア
+    glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer.GetBufferID());
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glDepthMask(GL_TRUE);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // メッシュの描画処理
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
+    glCullFace(GL_BACK);
+    glDepthFunc(GL_LESS);
+
+    
 }

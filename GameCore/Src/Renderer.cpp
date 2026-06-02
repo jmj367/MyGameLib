@@ -53,24 +53,20 @@ void Renderer::Draw()
     {
         mViewMat,
         mProjMat,
-        mSpriteDrawList,
         mMeshDrawList,
         mSkinnedMeshDrawList,
         mPointLightDrawList,
         mSpotLightDrawList,
         mDirectionalLightDrawList,
         mAmbientLightDrawList,
-        mPostProcessDrawList
+        mSpriteDrawList,
+        mPostProcessDrawList,
     };
 
     // 描画
     mBackend->DrawFrame(drawInfo);
 
     // 描画コマンドのクリア
-    {
-        std::lock_guard<std::mutex> lock(mSpriteDrawListMutex);
-        mSpriteDrawList.clear();
-    }
     {
         std::lock_guard<std::mutex> lock(mMeshDrawListMutex);
         mMeshDrawList.clear();
@@ -94,6 +90,10 @@ void Renderer::Draw()
     {
         std::lock_guard<std::mutex> lock(mAmbientLightDrawListMutex);
         mAmbientLightDrawList.clear();
+    }
+    {
+        std::lock_guard<std::mutex> lock(mSpriteDrawListMutex);
+        mSpriteDrawList.clear();
     }
     {
         std::lock_guard<std::mutex> lock(mPostProcessDrawListMutex);

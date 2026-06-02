@@ -62,13 +62,3 @@ void GBuffer::Destroy()
 {
 	glDeleteFramebuffers(1, &mBufferID);
 }
-
-ResourceID GBuffer::GetTexture(Type type)
-{
-	if (mTextures.size() > 0)
-	{
-		return mTextures[type];
-	}
-	
-	return NUM_GBUFFER_TEXTURES; // 無効なIDを返す
-}

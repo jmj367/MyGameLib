@@ -21,9 +21,6 @@ public:
 	// 生成・破棄
 	bool Create(int width, int height);
 	void Destroy();
-	
-	// 指定した種類のテクスチャを取得
-	ResourceID GetTexture(Type type);
 
 	// ゲッター
 	unsigned int GetBufferID() const { return mBufferID; }

@@ -34,6 +34,15 @@ public:
     void DrawFrame(const FrameDrawInfo &drawInfo) override;
 
 private:
+    // 描画の各段階
+    void DrawMesh(const FrameDrawInfo &drawInfo);
+    void DrawLighting(const FrameDrawInfo &drawInfo);
+    void DrawForward(const FrameDrawInfo &drawInfo);
+    void DrawEffects(const FrameDrawInfo &drawInfo);
+    void DrawSprites(const FrameDrawInfo &drawInfo);
+    void DrawPostProcess(const FrameDrawInfo &drawInfo);
+    void DrawUI(const FrameDrawInfo &drawInfo);
+
     // リソースのキャッシュ
     std::unordered_map<ResourceID, Texture    > mTextures;
     std::unordered_map<ResourceID, Mesh       > mMeshes;
@@ -45,6 +54,11 @@ private:
 
     // OpenGLのコンテキスト
     SDL_GLContext mGLContext;
+
     // Gバッファ
     GBuffer mGBuffer;
+
+    // スクリーンサイズ
+    float mScreenWidth;
+    float mScreenHeight;
 };
