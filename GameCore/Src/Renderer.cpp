@@ -54,7 +54,6 @@ void Renderer::Draw()
         mViewMat,
         mProjMat,
         mMeshDrawList,
-        mSkinnedMeshDrawList,
         mPointLightDrawList,
         mSpotLightDrawList,
         mDirectionalLightDrawList,
@@ -70,10 +69,6 @@ void Renderer::Draw()
     {
         std::lock_guard<std::mutex> lock(mMeshDrawListMutex);
         mMeshDrawList.clear();
-    }
-    {
-        std::lock_guard<std::mutex> lock(mSkinnedMeshDrawListMutex);
-        mSkinnedMeshDrawList.clear();
     }
     {
         std::lock_guard<std::mutex> lock(mPointLightDrawListMutex);
@@ -117,12 +112,6 @@ void Renderer::DrawMesh(const MeshDrawInfo &meshInfo)
 {
     std::lock_guard<std::mutex> lock(mMeshDrawListMutex);
     mMeshDrawList.push_back(meshInfo);
-}
-
-void Renderer::DrawSkinnedMesh(const SkinnedMeshDrawInfo &skinnedMeshInfo)
-{
-    std::lock_guard<std::mutex> lock(mSkinnedMeshDrawListMutex);
-    mSkinnedMeshDrawList.push_back(skinnedMeshInfo);
 }
 
 void Renderer::DrawPointLight(const PointLightDrawInfo &pointLight)

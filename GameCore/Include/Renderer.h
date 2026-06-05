@@ -42,18 +42,6 @@ public:
 	// メッシュの描画コマンドを送信
 	void DrawMesh(const MeshDrawInfo &meshInfo);
 
-	// スキンメッシュ描画の為の構造体
-	struct SkinnedMeshDrawInfo
-	{
-		ResourceID 		MeshID;
-		ResourceID 		TextureID;
-		MatrixPalette 	MatrixPalette;
-		Matrix4 		WorldTransform;
-		ResourceID 		ShaderID; // NOTE: 要らないかも
-	};
-	// スキンメッシュの描画コマンドを送信
-	void DrawSkinnedMesh(const SkinnedMeshDrawInfo &skinnedMeshInfo);
-
 	// ポイントライトの構造体
 	struct PointLightDrawInfo
 	{
@@ -176,7 +164,6 @@ private:
 	// 描画コマンド
 	std::vector<SpriteDrawInfo> 			mSpriteDrawList				;
 	std::vector<MeshDrawInfo> 				mMeshDrawList				;
-	std::vector<SkinnedMeshDrawInfo> 		mSkinnedMeshDrawList		;
 	std::vector<PointLightDrawInfo> 		mPointLightDrawList			;
 	std::vector<SpotLightDrawInfo> 			mSpotLightDrawList			;
 	// ディレクショナルライトと環境光は数が少ないことが想定されるが、一応描画コマンドのリストにしておく
@@ -187,7 +174,6 @@ private:
 	// 描画コマンドのロック
 	std::mutex mSpriteDrawListMutex				;
 	std::mutex mMeshDrawListMutex				;
-	std::mutex mSkinnedMeshDrawListMutex		;
 	std::mutex mPointLightDrawListMutex			;
 	std::mutex mSpotLightDrawListMutex			;
 	std::mutex mDirectionalLightDrawListMutex	;

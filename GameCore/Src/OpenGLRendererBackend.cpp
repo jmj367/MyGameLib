@@ -220,7 +220,6 @@ void OpenGLRendererBackend::DrawFrame(const FrameDrawInfo &drawInfo)
 
 void OpenGLRendererBackend::DrawMesh(const FrameDrawInfo &drawInfo)
 {
-    // メッシュの描画処理
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
     glCullFace(GL_BACK);

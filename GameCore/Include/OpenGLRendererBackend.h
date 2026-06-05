@@ -37,7 +37,6 @@ public:
 private:
     // 描画の各段階
     void DrawMesh(const FrameDrawInfo &drawInfo);
-    void DrawSkinnedMesh(const FrameDrawInfo &drawInfo);
     void DrawLighting(const FrameDrawInfo &drawInfo);
     void DrawForward(const FrameDrawInfo &drawInfo);
     void DrawEffects(const FrameDrawInfo &drawInfo);

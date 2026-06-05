@@ -41,7 +41,6 @@ public:
         Matrix4 View;
         Matrix4 Projection;
         const std::vector<Renderer::MeshDrawInfo            > &MeshDrawInfos              ;
-        const std::vector<Renderer::SkinnedMeshDrawInfo     > &SkinnedMeshDrawInfos       ;
         const std::vector<Renderer::PointLightDrawInfo      > &PointLightDrawInfos        ;
         const std::vector<Renderer::SpotLightDrawInfo       > &SpotLightDrawInfos         ;
         const std::vector<Renderer::DirectionalLightDrawInfo> &DirectionalLightDrawInfos  ;

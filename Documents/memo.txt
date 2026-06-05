@@ -1,2 +1,8 @@
 エフェクト処理はEffectSystem(プール、計算のみ)とレンダリングでクラスを分割する
 エフェクトレンダリングはRendererに持たせる(またはRendererにエフェクト用サブクラスを持たせる)
+
+メッシュとスキンメッシュの描画は分けるべきか
+違い：
+    shader->SetMatrixUniforms("uMatrixPalette"...);
+    をするか否か
+分けないことにする
