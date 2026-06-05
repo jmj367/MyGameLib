@@ -49,7 +49,7 @@ public:
 		ResourceID 		TextureID;
 		MatrixPalette 	MatrixPalette;
 		Matrix4 		WorldTransform;
-		ResourceID 		ShaderID;
+		ResourceID 		ShaderID; // NOTE: 要らないかも
 	};
 	// スキンメッシュの描画コマンドを送信
 	void DrawSkinnedMesh(const SkinnedMeshDrawInfo &skinnedMeshInfo);

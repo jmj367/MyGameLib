@@ -31,11 +31,13 @@ public:
     void ReleaseShader  (ResourceID shaderID  ) override;
     void ReleaseAllResources() override;
 
+    // フレーム描画
     void DrawFrame(const FrameDrawInfo &drawInfo) override;
 
 private:
     // 描画の各段階
     void DrawMesh(const FrameDrawInfo &drawInfo);
+    void DrawSkinnedMesh(const FrameDrawInfo &drawInfo);
     void DrawLighting(const FrameDrawInfo &drawInfo);
     void DrawForward(const FrameDrawInfo &drawInfo);
     void DrawEffects(const FrameDrawInfo &drawInfo);

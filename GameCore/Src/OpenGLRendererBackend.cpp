@@ -208,22 +208,58 @@ void OpenGLRendererBackend::ReleaseAllResources()
 
 void OpenGLRendererBackend::DrawFrame(const FrameDrawInfo &drawInfo)
 {
-
-}
-
-void OpenGLRendererBackend::DrawMesh(const FrameDrawInfo &drawInfo)
-{
     // バッファのクリア
     glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer.GetBufferID());
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glDepthMask(GL_TRUE);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    // 描画の各段階
+    DrawMesh(drawInfo);
+}
+
+void OpenGLRendererBackend::DrawMesh(const FrameDrawInfo &drawInfo)
+{
     // メッシュの描画処理
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
     glCullFace(GL_BACK);
     glDepthFunc(GL_LESS);
 
-    
+    for (const auto &meshDrawInfo : drawInfo.MeshDrawInfos)
+    {
+        // 描画処理
+
+        // シェーダー
+        auto shaderIter = mShaders.find(meshDrawInfo.ShaderID);
+        if (shaderIter == mShaders.end())
+        {
+            continue;
+        }
+        Shader &shader = shaderIter->second;
+        shader.SetActive();
+        shader.SetMatrixUniform("uVIewProj", drawInfo.View * drawInfo.Projection);
+
+        // テクスチャ
+        auto textureIter = mTextures.find(meshDrawInfo.TextureID);
+        if (textureIter == mTextures.end())
+        {
+            continue;
+        }
+        Texture &texture = textureIter->second;
+        texture.SetActive();
+
+        // 頂点配列
+        auto meshIter = mMeshes.find(meshDrawInfo.MeshID);
+        if (meshIter == mMeshes.end())
+        {
+            continue;
+        }
+        Mesh &mesh = meshIter->second;
+        VertexArray *vertexArray = mesh.GetVertexArray();
+        vertexArray->SetActive();
+
+        // 描画
+        glDrawElements(GL_TRIANGLES, vertexArray->GetNumIndices(), GL_UNSIGNED_INT, nullptr);
+    }
 }
