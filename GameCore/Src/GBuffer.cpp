@@ -29,12 +29,12 @@ bool GBuffer::Create(int width, int height)
 	// Gバッファ用のテクスチャを作成
 	for (int i = 0; i < NUM_GBUFFER_TEXTURES; i++)
 	{
-		Texture* tex = new Texture();
 		// レンダリング用に作成
-		tex->CreateForRendering(width, height, GL_RGB32F);
+		Texture tex;
+		tex.CreateForRendering(width, height, GL_RGB32F);
 		mTextures.emplace_back(tex);
 		// フレームバッファにアタッチ
-		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, tex->GetTextureID(), 0);
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, tex.GetTextureID(), 0);
 	}
 	
 	// アタッチメントのリストを作成
@@ -61,4 +61,9 @@ bool GBuffer::Create(int width, int height)
 void GBuffer::Destroy()
 {
 	glDeleteFramebuffers(1, &mBufferID);
+	for(int i = 0; i < NUM_GBUFFER_TEXTURES; i++)
+	{
+		mTextures[i].Unload();
+	}
+	mTextures.clear();
 }

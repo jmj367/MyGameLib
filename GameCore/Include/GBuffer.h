@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Define.h"
+#include "Texture.h"
 #include <vector>
 
 class GBuffer
@@ -26,7 +27,7 @@ public:
 	unsigned int GetBufferID() const { return mBufferID; }
 private:
 	// Gバッファ用テクスチャ群
-	std::vector<ResourceID> mTextures;
+	std::vector<Texture> mTextures;
 	// バッファID
 	unsigned int mBufferID;
 };

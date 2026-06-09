@@ -6,3 +6,5 @@
     shader->SetMatrixUniforms("uMatrixPalette"...);
     をするか否か
 分けないことにする
+
+ポストプロセスを複数適用できるようにピンポンバッファを実装する

@@ -262,3 +262,7 @@ void OpenGLRendererBackend::DrawMesh(const FrameDrawInfo &drawInfo)
         glDrawElements(GL_TRIANGLES, vertexArray->GetNumIndices(), GL_UNSIGNED_INT, nullptr);
     }
 }
+
+void OpenGLRendererBackend::DrawLighting(const FrameDrawInfo &drawInfo)
+{
+}
