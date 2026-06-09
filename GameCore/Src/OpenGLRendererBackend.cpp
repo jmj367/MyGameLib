@@ -215,17 +215,17 @@ void OpenGLRendererBackend::DrawFrame(const FrameDrawInfo &drawInfo)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // 描画の各段階
-    DrawMesh(drawInfo);
+    DrawMesh(drawInfo.MeshDrawInfos);
 }
 
-void OpenGLRendererBackend::DrawMesh(const FrameDrawInfo &drawInfo)
+void OpenGLRendererBackend::DrawMesh(const std::vector<Renderer::MeshDrawInfo> &drawInfo, const Matrix4 &view, const Matrix4 &proj)
 {
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
     glCullFace(GL_BACK);
     glDepthFunc(GL_LESS);
 
-    for (const auto &meshDrawInfo : drawInfo.MeshDrawInfos)
+    for (const auto &meshDrawInfo : drawInfo)
     {
         // 描画処理
 
@@ -237,7 +237,7 @@ void OpenGLRendererBackend::DrawMesh(const FrameDrawInfo &drawInfo)
         }
         Shader &shader = shaderIter->second;
         shader.SetActive();
-        shader.SetMatrixUniform("uVIewProj", drawInfo.View * drawInfo.Projection);
+        shader.SetMatrixUniform("uVIewProj", view * proj);
 
         // テクスチャ
         auto textureIter = mTextures.find(meshDrawInfo.TextureID);

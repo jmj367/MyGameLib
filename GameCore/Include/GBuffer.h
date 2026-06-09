@@ -23,6 +23,8 @@ public:
 	bool Create(int width, int height);
 	void Destroy();
 
+	void SetTexturesActive();
+
 	// ゲッター
 	unsigned int GetBufferID() const { return mBufferID; }
 private:

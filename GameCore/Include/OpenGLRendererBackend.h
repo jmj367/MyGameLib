@@ -9,6 +9,7 @@
 #include "Texture.h"
 #include "VertexArray.h"
 #include <SDL2/SDL.h>
+#include <vector>
 
 class OpenGLRendererBackend : public RendererBackend
 {
@@ -36,7 +37,10 @@ public:
 
 private:
     // 描画の各段階
-    void DrawMesh(const FrameDrawInfo &drawInfo);
+    void DrawMesh(
+        const std::vector<Renderer::MeshDrawInfo> &drawInfo, 
+        const Matrix4 &view, 
+        const Matrix4 &proj);
     void DrawLighting(const FrameDrawInfo &drawInfo);
     void DrawForward(const FrameDrawInfo &drawInfo);
     void DrawEffects(const FrameDrawInfo &drawInfo);

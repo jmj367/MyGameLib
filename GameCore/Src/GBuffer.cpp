@@ -67,3 +67,11 @@ void GBuffer::Destroy()
 	}
 	mTextures.clear();
 }
+
+void GBuffer::SetTexturesActive()
+{
+	for(int i = 0; i < NUM_GBUFFER_TEXTURES; i++)
+	{
+		mTextures[i].SetActive(i);
+	}
+}
