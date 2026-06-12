@@ -45,6 +45,7 @@ public:
 	// ポイントライトの構造体
 	struct PointLightDrawInfo
 	{
+		Matrix4 WorldTransform;
 		Vector3 Position;
 		float 	Radius;
 		Vector3 Color;
@@ -79,6 +80,7 @@ public:
 	void DrawDirectionalLight(const DirectionalLightDrawInfo &directionalLight);
 
 	// 環境光の構造体(Vector3直接でもいいが拡張性を残しておく)
+	// NOTE: 環境光は基本的に1つしかないことが想定されるが、将来的に複数の環境光をサポートする可能性もあるので、描画コマンドのリストにしておく
 	struct AmbientLightDrawInfo
 	{
 		Vector3 Color;
@@ -172,6 +174,7 @@ private:
 	std::vector<PostProcessDrawInfo> 		mPostProcessDrawList		;
 
 	// 描画コマンドのロック
+	// いずれマルチスレッドで描画コマンドを送信することも考えられるので、ロックを用意しておく
 	std::mutex mSpriteDrawListMutex				;
 	std::mutex mMeshDrawListMutex				;
 	std::mutex mPointLightDrawListMutex			;

@@ -57,6 +57,24 @@ bool OpenGLRendererBackend::Initialize(void *windowHandle, float screenWidth, fl
         return false;
     }
 
+    // ポストプロセス用バッファの初期化
+    if (!mPostProcessBuffer.Create(width, height))
+    {
+        return false;
+    }
+
+    // 球メッシュのロード
+    if (!GetMesh("" /* TODO: メッシュファイル名 */, mSphereMesh))
+    {
+        return false;
+    }
+
+    // ライト描画用シェーダーのロード
+    if (!GetShader("", "" /* TODO: シェーダーファイル名 */, mLightShader))
+    {
+        return false;
+    }
+
     mScreenWidth = screenWidth;
     mScreenHeight = screenHeight;
 
@@ -208,18 +226,19 @@ void OpenGLRendererBackend::ReleaseAllResources()
 
 void OpenGLRendererBackend::DrawFrame(const FrameDrawInfo &drawInfo)
 {
-    // バッファのクリア
-    glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer.GetBufferID());
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glDepthMask(GL_TRUE);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     // 描画の各段階
     DrawMesh(drawInfo.MeshDrawInfos);
 }
 
 void OpenGLRendererBackend::DrawMesh(const std::vector<Renderer::MeshDrawInfo> &drawInfo, const Matrix4 &view, const Matrix4 &proj)
 {
+    glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer.GetBufferID());
+
+    // バッファのクリア
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glDepthMask(GL_TRUE);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
     glCullFace(GL_BACK);
@@ -265,4 +284,101 @@ void OpenGLRendererBackend::DrawMesh(const std::vector<Renderer::MeshDrawInfo> &
 
 void OpenGLRendererBackend::DrawLighting(const FrameDrawInfo &drawInfo)
 {
+    glBindFramebuffer(GL_FRAMEBUFFER, mPostProcessBuffer.GetWriteBufferID());
+
+    mGBuffer.SetTexturesActive();
+
+    // バッファのクリア
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
+    glDisable(GL_DEPTH_TEST);
+
+    // シェーダー
+    auto shaderIter = mShaders.find(mLightShader);
+    if (shaderIter == mShaders.end())
+    {
+        return;
+    }
+    Shader &shader = shaderIter->second;
+    shader.SetActive();
+
+    // カメラ位置をシェーダーに渡す
+    Matrix4 invView = drawInfo.View;
+    invView.Invert();
+    shader.SetVector3Uniform("uCameraPos", invView.GetTranslation());
+
+    // 環境光
+    // HACK: AmbientLightDrawInfosは複数の環境光を想定しているが、現状は1つしか描画しない
+    if (!drawInfo.AmbientLightDrawInfos.empty())
+    {
+        const auto &ambientLight = drawInfo.AmbientLightDrawInfos[0];
+        shader.SetVector3Uniform("uAmbientLight", ambientLight.Color);
+    }
+
+    // 平行光源
+    // HACK: DirectionalLightDrawInfosは複数の平行光源を想定しているが、現状は1つしか描画しない
+    if (!drawInfo.DirectionalLightDrawInfos.empty())
+    {
+        const auto &dirLight = drawInfo.DirectionalLightDrawInfos[0];
+        shader.SetVector3Uniform("uDirLight.Direction", dirLight.Direction);
+        shader.SetVector3Uniform("uDirLight.DiffuseColor", dirLight.DiffuseColor);
+        shader.SetVector3Uniform("uDirLight.SpecularColor", dirLight.SpecularColor);
+    }
+
+    // 描画
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+
+    // 深度バッファをコピー
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, mGBuffer.GetBufferID());
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mPostProcessBuffer.GetWriteBufferID());
+    int width = static_cast<int>(mScreenWidth);
+    int height = static_cast<int>(mScreenHeight);
+    glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
+    // 点光源の描画
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
+    glDepthFunc(GL_GEQUAL);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE);
+
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_FRONT);
+
+    // シェーダー
+    shaderIter = mShaders.find(mLightShader);
+    if (shaderIter == mShaders.end())
+    {
+        return;
+    }
+    shader = shaderIter->second;
+    shader.SetActive();
+    shader.SetMatrixUniform("uViewProj", drawInfo.View * drawInfo.Projection);
+
+    // 頂点配列
+    auto meshIter = mMeshes.find(mSphereMesh);
+    if (meshIter == mMeshes.end())
+    {
+        return;
+    }
+    Mesh &mesh = meshIter->second;
+    VertexArray *vertexArray = mesh.GetVertexArray();
+    vertexArray->SetActive();
+
+    mGBuffer.SetTexturesActive();
+
+    for (const auto &pointLightDrawInfo : drawInfo.PointLightDrawInfos)
+    {
+        // 点光源の位置と半径をシェーダーに渡す
+        shader.SetMatrixUniform("uPointLight.WorldTransform", pointLightDrawInfo.WorldTransform);
+        shader.SetVector3Uniform("uPointLight.Position", pointLightDrawInfo.Position);
+        shader.SetFloatUniform("uPointLight.Radius", pointLightDrawInfo.Radius);
+        shader.SetVector3Uniform("uPointLight.Color", pointLightDrawInfo.Color);
+        shader.SetFloatUniform("uPointLight.Intensity", pointLightDrawInfo.Intensity);
+
+        // 描画
+        glDrawElements(GL_TRIANGLES, vertexArray->GetNumIndices(), GL_UNSIGNED_INT, nullptr);
+    }
 }

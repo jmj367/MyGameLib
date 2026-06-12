@@ -4,6 +4,7 @@
 #include "Define.h"
 #include "GBuffer.h"
 #include "Mesh.h"
+#include "PostProcessBuffer.h"
 #include "Shader.h"
 #include "Skeleton.h"
 #include "Texture.h"
@@ -42,11 +43,11 @@ private:
         const Matrix4 &view, 
         const Matrix4 &proj);
     void DrawLighting(const FrameDrawInfo &drawInfo);
-    void DrawForward(const FrameDrawInfo &drawInfo);
-    void DrawEffects(const FrameDrawInfo &drawInfo);
+    //void DrawTransparent(const FrameDrawInfo &drawInfo);
+    //void DrawEffects(const FrameDrawInfo &drawInfo);
     void DrawSprites(const FrameDrawInfo &drawInfo);
     void DrawPostProcess(const FrameDrawInfo &drawInfo);
-    void DrawUI(const FrameDrawInfo &drawInfo);
+    //void DrawUI(const FrameDrawInfo &drawInfo);
 
     // リソースのキャッシュ
     std::unordered_map<ResourceID, Texture    > mTextures;
@@ -62,8 +63,16 @@ private:
 
     // Gバッファ
     GBuffer mGBuffer;
+    // ポストプロセス用バッファ
+    PostProcessBuffer mPostProcessBuffer;
 
     // スクリーンサイズ
     float mScreenWidth;
     float mScreenHeight;
+
+    // 球メッシュ(ライトの描画等で使用)
+    ResourceID mSphereMesh;
+    // シェーダー(ライトの描画等で使用)
+    ResourceID mLightShader;
+    
 };
