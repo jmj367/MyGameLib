@@ -382,4 +382,11 @@ void OpenGLRendererBackend::DrawLighting(const FrameDrawInfo &drawInfo)
         // 描画
         glDrawElements(GL_TRIANGLES, vertexArray->GetNumIndices(), GL_UNSIGNED_INT, nullptr);
     }
+
+    mPostProcessBuffer.Swap();
+
+    glDepthMask(GL_TRUE);
+    glDepthFunc(GL_LESS);
+    glDisable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
 }
