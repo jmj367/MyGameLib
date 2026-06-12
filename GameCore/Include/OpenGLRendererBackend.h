@@ -45,7 +45,8 @@ private:
     void DrawLighting(const FrameDrawInfo &drawInfo);
     //void DrawTransparent(const FrameDrawInfo &drawInfo);
     //void DrawEffects(const FrameDrawInfo &drawInfo);
-    void DrawSprites(const FrameDrawInfo &drawInfo);
+    void Draw3DSprites(const FrameDrawInfo &drawInfo);
+    void Draw2DSprites(const FrameDrawInfo &drawInfo);
     void DrawPostProcess(const FrameDrawInfo &drawInfo);
     //void DrawUI(const FrameDrawInfo &drawInfo);
 

@@ -344,6 +344,7 @@ void OpenGLRendererBackend::DrawLighting(const FrameDrawInfo &drawInfo)
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE);
 
+    // ライトのメッシュ内にカメラが入ったときに正しく描画されるように表面をカリングする
     glEnable(GL_CULL_FACE);
     glCullFace(GL_FRONT);
 
