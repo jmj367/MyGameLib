@@ -1,36 +1,79 @@
+#pragma once
+
 #include "RendererBackend.h"
+#include "Define.h"
+#include "GBuffer.h"
 #include "Mesh.h"
+#include "PostProcessBuffer.h"
 #include "Shader.h"
 #include "Skeleton.h"
 #include "Texture.h"
+#include "VertexArray.h"
+#include <SDL2/SDL.h>
+#include <vector>
 
 class OpenGLRendererBackend : public RendererBackend
 {
 public:
-    OpenGLRendererBackend(Renderer *renderer);
+    OpenGLRendererBackend();
     ~OpenGLRendererBackend() override;
 
+    bool PrepareWindow() override;
     bool Initialize(void *windowHandle, float screenWidth, float screenHeight) override;
     void Shutdown() override;
-    void Draw() override;
 
     // リソースの取得/解放
-    bool GetTexture     (const std::string &fileName, Renderer::ResourceID &outID) override;
-    bool GetMesh        (const std::string &fileName, Renderer::ResourceID &outID) override;
-    bool GetSkeleton    (const std::string &fileName, Renderer::ResourceID &outID) override;
-    bool GetShader      (const std::string &vertexShaderFileName, const std::string &fragmentShaderFileName, Renderer::ResourceID &outID) override;
-    void ReleaseTexture (Renderer::ResourceID textureID ) override;
-    void ReleaseMesh    (Renderer::ResourceID meshID    ) override;
-    void ReleaseSkeleton(Renderer::ResourceID skeletonID) override;
-    void ReleaseShader  (Renderer::ResourceID shaderID  ) override;
+    bool GetTexture     (const std::string &fileName, ResourceID &outID) override;
+    bool GetMesh        (const std::string &fileName, ResourceID &outID) override;
+    bool GetSkeleton    (const std::string &fileName, ResourceID &outID) override;
+    bool GetShader      (const std::string &vertexShaderFileName, const std::string &fragmentShaderFileName, ResourceID &outID) override;
+    void ReleaseTexture (ResourceID textureID ) override;
+    void ReleaseMesh    (ResourceID meshID    ) override;
+    void ReleaseSkeleton(ResourceID skeletonID) override;
+    void ReleaseShader  (ResourceID shaderID  ) override;
     void ReleaseAllResources() override;
 
+    // フレーム描画
     void DrawFrame(const FrameDrawInfo &drawInfo) override;
 
 private:
+    // 描画の各段階
+    void DrawMesh(
+        const std::vector<Renderer::MeshDrawInfo> &drawInfo, 
+        const Matrix4 &view, 
+        const Matrix4 &proj);
+    void DrawLighting(const FrameDrawInfo &drawInfo);
+    //void DrawTransparent(const FrameDrawInfo &drawInfo);
+    //void DrawEffects(const FrameDrawInfo &drawInfo);
+    //void Draw3DSprites(const FrameDrawInfo &drawInfo);
+    //void Draw2DSprites(const FrameDrawInfo &drawInfo);
+    void DrawPostProcess(const FrameDrawInfo &drawInfo);
+    //void DrawUI(const FrameDrawInfo &drawInfo);
+
     // リソースのキャッシュ
-    std::unordered_map<Renderer::ResourceID, Texture    > mTextures;
-    std::unordered_map<Renderer::ResourceID, Mesh       > mMeshes;
-    std::unordered_map<Renderer::ResourceID, Skeleton   > mSkeletons;
-    std::unordered_map<Renderer::ResourceID, Shader     > mShaders;
+    std::unordered_map<ResourceID, Texture    > mTextures;
+    std::unordered_map<ResourceID, Mesh       > mMeshes;
+    std::unordered_map<ResourceID, Skeleton   > mSkeletons;
+    std::unordered_map<ResourceID, Shader     > mShaders;
+
+    // リソースIDの管理
+    ResourceID mNextResourceID;
+
+    // OpenGLのコンテキスト
+    SDL_GLContext mGLContext;
+
+    // Gバッファ
+    GBuffer mGBuffer;
+    // ポストプロセス用バッファ
+    PostProcessBuffer mPostProcessBuffer;
+
+    // スクリーンサイズ
+    float mScreenWidth;
+    float mScreenHeight;
+
+    // 球メッシュ(ライトの描画等で使用)
+    ResourceID mSphereMesh;
+    // シェーダー(ライトの描画等で使用)
+    ResourceID mLightShader;
+    
 };

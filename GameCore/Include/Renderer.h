@@ -1,8 +1,10 @@
 #pragma once
 
+#include "Define.h"
 #include "Math.h"
 #include "MatrixPalette.h"
 #include <mutex>
+#include <SDL2/SDL.h>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -13,8 +15,6 @@ class RendererBackend;
 class Renderer
 {
 public:
-	using ResourceID = size_t;
-
 	// APIの種類
 	enum class GraphicsAPI
 	{
@@ -24,24 +24,13 @@ public:
 	Renderer(class Game *game);
 	virtual ~Renderer();
 
+	virtual bool PrepareWindow(); // ウィンドウ作成前の初期化処理(必要なら)
 	virtual bool Initialize(void* windowHandle, float screenWidth, float screenHeight, GraphicsAPI apiType = GraphicsAPI::OpenGL);
 	virtual void Shutdown();
-	virtual void Draw();
+	virtual void Draw(SDL_Window *window);
 
 	// 各種描画コマンドの構造体と送信関数
 	// RendererBackendをラップする
-
-	// スプライト描画の為の構造体
-	struct SpriteDrawInfo
-	{
-		size_t 		TextureID;
-		Vector2 	TextureSize;
-		Matrix4 	WorldTransform;
-		ResourceID 	ShaderID;
-		int 		DrawOrder;
-	};
-	// スプライトの描画コマンドを送信
-	void DrawSprite(const SpriteDrawInfo &spriteInfo);
 
 	// メッシュ描画の為の構造体
 	struct MeshDrawInfo
@@ -54,21 +43,10 @@ public:
 	// メッシュの描画コマンドを送信
 	void DrawMesh(const MeshDrawInfo &meshInfo);
 
-	// スキンメッシュ描画の為の構造体
-	struct SkinnedMeshDrawInfo
-	{
-		ResourceID 		MeshID;
-		ResourceID 		TextureID;
-		MatrixPalette 	MatrixPalette;
-		Matrix4 		WorldTransform;
-		ResourceID 		ShaderID;
-	};
-	// スキンメッシュの描画コマンドを送信
-	void DrawSkinnedMesh(const SkinnedMeshDrawInfo &skinnedMeshInfo);
-
 	// ポイントライトの構造体
 	struct PointLightDrawInfo
 	{
+		Matrix4 WorldTransform;
 		Vector3 Position;
 		float 	Radius;
 		Vector3 Color;
@@ -103,12 +81,35 @@ public:
 	void DrawDirectionalLight(const DirectionalLightDrawInfo &directionalLight);
 
 	// 環境光の構造体(Vector3直接でもいいが拡張性を残しておく)
+	// NOTE: 環境光は基本的に1つしかないことが想定されるが、将来的に複数の環境光をサポートする可能性もあるので、描画コマンドのリストにしておく
 	struct AmbientLightDrawInfo
 	{
 		Vector3 Color;
 	};
 	// 環境光の描画コマンドを送信
 	void DrawAmbientLight(const AmbientLightDrawInfo &ambientLight);
+
+	// スプライト描画の為の構造体
+	struct SpriteDrawInfo
+	{
+		size_t 		TextureID;
+		Vector2 	TextureSize;
+		Matrix4 	WorldTransform;
+		ResourceID 	ShaderID;
+		int 		DrawOrder;
+	};
+	// スプライトの描画コマンドを送信
+	void DrawSprite(const SpriteDrawInfo &spriteInfo);
+
+	// ポストプロセスの構造体(一応構造体にしておく)
+	struct PostProcessDrawInfo
+	{
+		ResourceID ShaderID;
+	};
+	// ポストプロセスの描画コマンドを送信
+	void DrawPostProcess(const PostProcessDrawInfo &postProcessInfo);
+
+
 
 	// リソースの取得/解放
 	bool GetTexture		(const std::string &fileName, ResourceID& outID);
@@ -126,10 +127,10 @@ public:
 	void ReleaseAllResources();
 
 	// リソースIDからリソース名を取得
-	bool GetTexture	(ResourceID textureID	, std::string &outFileName);
-	bool GetMesh	(ResourceID meshID		, std::string &outFileName);
-	bool GetSkeleton(ResourceID skeletonID	, std::string &outFileName);
-	bool GetShader	(ResourceID shaderID	, std::string &outVertexShaderFileName, std::string &outFragmentShaderFileName);
+	bool GetTextureName	(ResourceID textureID	, std::string &outFileName);
+	bool GetMeshName	(ResourceID meshID		, std::string &outFileName);
+	bool GetSkeletonName(ResourceID skeletonID	, std::string &outFileName);
+	bool GetShaderName	(ResourceID shaderID	, std::string &outVertexShaderFileName, std::string &outFragmentShaderFileName);
 
 	// スクリーンサイズのゲッター
 	float GetScreenWidth	() const { return mScreenWidth	; }
@@ -154,34 +155,32 @@ private:
 	Matrix4 mViewMat;
 	Matrix4 mProjMat;
 
-	// リソースIDの管理
-	ResourceID mNextResourceID;
-
 	// リソース検索用マップ
-	std::unordered_map<std::string, ResourceID> mTextureFileNameToID;
-	std::unordered_map<std::string, ResourceID> mMeshFileNameToID;
-	std::unordered_map<std::string, ResourceID> mSkeletonFileNameToID;
-	std::unordered_map<std::pair<std::string, std::string>, ResourceID> mShaderFileNameToID;
+	std::unordered_map<std::string, ResourceID> mTextureFileNameToID	;
+	std::unordered_map<std::string, ResourceID> mMeshFileNameToID		;
+	std::unordered_map<std::string, ResourceID> mSkeletonFileNameToID	;
+	std::unordered_map<std::pair<std::string, std::string>, ResourceID, pair_hash> mShaderFileNameToID;
 
 	// バックエンドのインスタンス
 	std::unique_ptr<RendererBackend> mBackend;
 
 	// 描画コマンド
-	std::vector<SpriteDrawInfo> 			mSpriteDrawList;
-	std::vector<MeshDrawInfo> 				mMeshDrawList;
-	std::vector<SkinnedMeshDrawInfo> 		mSkinnedMeshDrawList;
-	std::vector<PointLightDrawInfo> 		mPointLightDrawList;
-	std::vector<SpotLightDrawInfo> 			mSpotLightDrawList;
+	std::vector<SpriteDrawInfo> 			mSpriteDrawList				;
+	std::vector<MeshDrawInfo> 				mMeshDrawList				;
+	std::vector<PointLightDrawInfo> 		mPointLightDrawList			;
+	std::vector<SpotLightDrawInfo> 			mSpotLightDrawList			;
 	// ディレクショナルライトと環境光は数が少ないことが想定されるが、一応描画コマンドのリストにしておく
-	std::vector<DirectionalLightDrawInfo> 	mDirectionalLightDrawList;
-	std::vector<AmbientLightDrawInfo> 		mAmbientLightDrawList;
+	std::vector<DirectionalLightDrawInfo> 	mDirectionalLightDrawList	;
+	std::vector<AmbientLightDrawInfo> 		mAmbientLightDrawList		;
+	std::vector<PostProcessDrawInfo> 		mPostProcessDrawList		;
 
 	// 描画コマンドのロック
-	std::mutex mSpriteDrawListMutex;
-	std::mutex mMeshDrawListMutex;
-	std::mutex mSkinnedMeshDrawListMutex;
-	std::mutex mPointLightDrawListMutex;
-	std::mutex mSpotLightDrawListMutex;
-	std::mutex mDirectionalLightDrawListMutex;
-	std::mutex mAmbientLightDrawListMutex;
+	// いずれマルチスレッドで描画コマンドを送信することも考えられるので、ロックを用意しておく
+	std::mutex mSpriteDrawListMutex				;
+	std::mutex mMeshDrawListMutex				;
+	std::mutex mPointLightDrawListMutex			;
+	std::mutex mSpotLightDrawListMutex			;
+	std::mutex mDirectionalLightDrawListMutex	;
+	std::mutex mAmbientLightDrawListMutex		;
+	std::mutex mPostProcessDrawListMutex		;
 };

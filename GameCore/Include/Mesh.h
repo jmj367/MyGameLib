@@ -1,4 +1,6 @@
 #pragma once
+
+#include "Define.h"
 #include "VertexArray.h"
 #include <cstdint>
 #include <vector>
@@ -39,8 +41,6 @@ namespace MeshBinary
 class Mesh
 {
 public:
-	using ResourceID = size_t;
-
 	Mesh();
 	~Mesh();
 
@@ -57,6 +57,9 @@ public:
 		mRadius 		= radius		;
 		mSpecPower 		= specPower		;
 	}
+
+	// メッシュデータをファイルから読み込む
+	bool Load(const std::string &fileName, class Renderer *renderer);
 
 	// ゲッター
 	ResourceID 	GetTexture		(size_t index) 	const { return mTextures[index]; }
