@@ -227,7 +227,9 @@ void OpenGLRendererBackend::ReleaseAllResources()
 void OpenGLRendererBackend::DrawFrame(const FrameDrawInfo &drawInfo)
 {
     // 描画の各段階
-    DrawMesh(drawInfo.MeshDrawInfos);
+    DrawMesh(drawInfo.MeshDrawInfos, drawInfo.View, drawInfo.Projection);
+    DrawLighting(drawInfo);
+    DrawPostProcess(drawInfo);
 }
 
 void OpenGLRendererBackend::DrawMesh(const std::vector<Renderer::MeshDrawInfo> &drawInfo, const Matrix4 &view, const Matrix4 &proj)
@@ -389,4 +391,37 @@ void OpenGLRendererBackend::DrawLighting(const FrameDrawInfo &drawInfo)
     glDepthFunc(GL_LESS);
     glDisable(GL_CULL_FACE);
     glCullFace(GL_BACK);
+}
+
+void OpenGLRendererBackend::DrawPostProcess(const FrameDrawInfo &drawInfo)
+{
+    glDisable(GL_DEPTH_TEST);
+
+    for (const auto &postProcessInfo : drawInfo.PostProcessDrawInfos)
+    {
+        // ポストプロセスの描画処理
+
+        // 出力先を書き込みバッファに指定
+        glBindFramebuffer(GL_FRAMEBUFFER, mPostProcessBuffer.GetWriteBufferID());
+
+        // 前の段階の結果を読み込みテクスチャとしてバインド
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, mPostProcessBuffer.GetReadBufferID());
+
+        // シェーダー
+        auto shaderIter = mShaders.find(postProcessInfo.ShaderID);
+        if (shaderIter == mShaders.end())
+        {
+            continue;
+        }
+
+        Shader &shader = shaderIter->second;
+        shader.SetActive();
+
+        // 描画
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+
+        // バッファのスワップ
+        mPostProcessBuffer.Swap();
+    }
 }
