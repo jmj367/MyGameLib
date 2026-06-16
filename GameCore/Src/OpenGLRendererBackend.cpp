@@ -226,27 +226,48 @@ void OpenGLRendererBackend::ReleaseAllResources()
 
 void OpenGLRendererBackend::DrawFrame(const FrameDrawInfo &drawInfo)
 {
-    // 描画の各段階
-    DrawMesh(drawInfo.MeshDrawInfos, drawInfo.View, drawInfo.Projection);
-    DrawLighting(drawInfo);
-    DrawPostProcess(drawInfo);
-
-    // バックバッファに転送
+    // バックバッファのクリア
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, mPostProcessBuffer.GetReadBufferID());
+    for (const auto &sceneDrawInfo : drawInfo.DrawInfoList)
+    {
+        DrawMesh(sceneDrawInfo.View, sceneDrawInfo.Projection, sceneDrawInfo.MeshDrawInfos);
+        DrawLighting(
+            sceneDrawInfo.View,
+            sceneDrawInfo.Projection,
+            sceneDrawInfo.PointLightDrawInfos,
+            sceneDrawInfo.SpotLightDrawInfos,
+            sceneDrawInfo.DirectionalLightDrawInfos,
+            sceneDrawInfo.AmbientLightDrawInfos
+        );
+        //DrawTransparent(sceneDrawInfo);
+        //DrawEffects(sceneDrawInfo);
+        //Draw3DSprites(sceneDrawInfo);
+        //Draw2DSprites(sceneDrawInfo);
+        DrawPostProcess(sceneDrawInfo.PostProcessDrawInfos);
+        //DrawUI(sceneDrawInfo);
 
-    // 描画
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, mPostProcessBuffer.GetReadBufferID());
+
+        glDisable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        // 描画
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+    }
 
     // バッファのスワップ
-    SDL_GL_SwapWindow(drawInfo.Window);
+    SDL_GL_SwapWindow(static_cast<SDL_Window*>(drawInfo.WindowHandle));
 }
 
-void OpenGLRendererBackend::DrawMesh(const std::vector<Renderer::MeshDrawInfo> &drawInfo, const Matrix4 &view, const Matrix4 &proj)
+void OpenGLRendererBackend::DrawMesh(
+    const Matrix4 &view, 
+    const Matrix4 &proj, 
+    const std::vector<Renderer::MeshDrawInfo> &drawInfo)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer.GetBufferID());
 
@@ -298,7 +319,14 @@ void OpenGLRendererBackend::DrawMesh(const std::vector<Renderer::MeshDrawInfo> &
     }
 }
 
-void OpenGLRendererBackend::DrawLighting(const FrameDrawInfo &drawInfo)
+void OpenGLRendererBackend::DrawLighting(
+    const Matrix4 &view,
+    const Matrix4 &proj,
+    const std::vector<Renderer::PointLightDrawInfo> &pointLightInfo,
+    const std::vector<Renderer::SpotLightDrawInfo> &spotLightInfo,
+    const std::vector<Renderer::DirectionalLightDrawInfo> &directionalLightInfo,
+    const std::vector<Renderer::AmbientLightDrawInfo> &ambientLightInfo
+)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, mPostProcessBuffer.GetWriteBufferID());
 
@@ -320,23 +348,23 @@ void OpenGLRendererBackend::DrawLighting(const FrameDrawInfo &drawInfo)
     shader.SetActive();
 
     // カメラ位置をシェーダーに渡す
-    Matrix4 invView = drawInfo.View;
+    Matrix4 invView = view;
     invView.Invert();
     shader.SetVector3Uniform("uCameraPos", invView.GetTranslation());
 
     // 環境光
     // HACK: AmbientLightDrawInfosは複数の環境光を想定しているが、現状は1つしか描画しない
-    if (!drawInfo.AmbientLightDrawInfos.empty())
+    if (!ambientLightInfo.empty())
     {
-        const auto &ambientLight = drawInfo.AmbientLightDrawInfos[0];
+        const auto &ambientLight = ambientLightInfo[0];
         shader.SetVector3Uniform("uAmbientLight", ambientLight.Color);
     }
 
     // 平行光源
     // HACK: DirectionalLightDrawInfosは複数の平行光源を想定しているが、現状は1つしか描画しない
-    if (!drawInfo.DirectionalLightDrawInfos.empty())
+    if (!directionalLightInfo.empty())
     {
-        const auto &dirLight = drawInfo.DirectionalLightDrawInfos[0];
+        const auto &dirLight = directionalLightInfo[0];
         shader.SetVector3Uniform("uDirLight.Direction", dirLight.Direction);
         shader.SetVector3Uniform("uDirLight.DiffuseColor", dirLight.DiffuseColor);
         shader.SetVector3Uniform("uDirLight.SpecularColor", dirLight.SpecularColor);
@@ -372,7 +400,7 @@ void OpenGLRendererBackend::DrawLighting(const FrameDrawInfo &drawInfo)
     }
     shader = shaderIter->second;
     shader.SetActive();
-    shader.SetMatrixUniform("uViewProj", drawInfo.View * drawInfo.Projection);
+    shader.SetMatrixUniform("uViewProj", view * proj);
 
     // 頂点配列
     auto meshIter = mMeshes.find(mSphereMesh);
@@ -386,7 +414,7 @@ void OpenGLRendererBackend::DrawLighting(const FrameDrawInfo &drawInfo)
 
     mGBuffer.SetTexturesActive();
 
-    for (const auto &pointLightDrawInfo : drawInfo.PointLightDrawInfos)
+    for (const auto &pointLightDrawInfo : pointLightInfo)
     {
         // 点光源の位置と半径をシェーダーに渡す
         shader.SetMatrixUniform("uPointLight.WorldTransform", pointLightDrawInfo.WorldTransform);
@@ -407,11 +435,11 @@ void OpenGLRendererBackend::DrawLighting(const FrameDrawInfo &drawInfo)
     glCullFace(GL_BACK);
 }
 
-void OpenGLRendererBackend::DrawPostProcess(const FrameDrawInfo &drawInfo)
+void OpenGLRendererBackend::DrawPostProcess(const std::vector<Renderer::PostProcessDrawInfo> &postProcessInfo)
 {
     glDisable(GL_DEPTH_TEST);
 
-    for (const auto &postProcessInfo : drawInfo.PostProcessDrawInfos)
+    for (const auto &postProcessInfo : postProcessInfo)
     {
         // ポストプロセスの描画処理
 

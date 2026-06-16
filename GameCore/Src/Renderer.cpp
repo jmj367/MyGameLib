@@ -46,54 +46,20 @@ void Renderer::Shutdown()
     mBackend->Shutdown();
 }
 
-void Renderer::Draw(SDL_Window *window)
+void Renderer::Draw(void *windowHandle)
 {
-    // パッケージング
+    // 描画コマンドのリストをバックエンドに渡して描画
     RendererBackend::FrameDrawInfo drawInfo
     {
-        window,
-        mViewMat,
-        mProjMat,
-        mMeshDrawList,
-        mPointLightDrawList,
-        mSpotLightDrawList,
-        mDirectionalLightDrawList,
-        mAmbientLightDrawList,
-        mSpriteDrawList,
-        mPostProcessDrawList,
+        windowHandle,
+        mSceneDrawList,
     };
-
-    // 描画
     mBackend->DrawFrame(drawInfo);
 
-    // 描画コマンドのクリア
+    // 描画コマンドのリストをクリア
     {
-        std::lock_guard<std::mutex> lock(mMeshDrawListMutex);
-        mMeshDrawList.clear();
-    }
-    {
-        std::lock_guard<std::mutex> lock(mPointLightDrawListMutex);
-        mPointLightDrawList.clear();
-    }
-    {
-        std::lock_guard<std::mutex> lock(mSpotLightDrawListMutex);
-        mSpotLightDrawList.clear();
-    }
-    {
-        std::lock_guard<std::mutex> lock(mDirectionalLightDrawListMutex);
-        mDirectionalLightDrawList.clear();
-    }
-    {
-        std::lock_guard<std::mutex> lock(mAmbientLightDrawListMutex);
-        mAmbientLightDrawList.clear();
-    }
-    {
-        std::lock_guard<std::mutex> lock(mSpriteDrawListMutex);
-        mSpriteDrawList.clear();
-    }
-    {
-        std::lock_guard<std::mutex> lock(mPostProcessDrawListMutex);
-        mPostProcessDrawList.clear();
+        std::lock_guard<std::mutex> lock(mFrameDrawListMutex);
+        mSceneDrawList.clear();
     }
 }
 
@@ -137,6 +103,63 @@ void Renderer::DrawAmbientLight(const AmbientLightDrawInfo &ambientLight)
 {
     std::lock_guard<std::mutex> lock(mAmbientLightDrawListMutex);
     mAmbientLightDrawList.push_back(ambientLight);
+}
+
+void Renderer::DrawPostProcess(const PostProcessDrawInfo &postProcessInfo)
+{
+    std::lock_guard<std::mutex> lock(mPostProcessDrawListMutex);
+    mPostProcessDrawList.push_back(postProcessInfo);
+}
+
+void Renderer::DrawScene(const Matrix4 &view, const Matrix4 &proj)
+{
+    std::lock_guard<std::mutex> lock(mFrameDrawListMutex);
+    
+    // パッケージング
+    SceneDrawInfo drawInfo
+    {
+        view,
+        proj,
+        mMeshDrawList,
+        mPointLightDrawList,
+        mSpotLightDrawList,
+        mDirectionalLightDrawList,
+        mAmbientLightDrawList,
+        mSpriteDrawList,
+        mPostProcessDrawList,
+    };
+
+    mSceneDrawList.push_back(drawInfo);
+
+    // 一時リストのクリア
+    {
+        std::lock_guard<std::mutex> lock(mMeshDrawListMutex);
+        mMeshDrawList.clear();
+    }
+    {
+        std::lock_guard<std::mutex> lock(mPointLightDrawListMutex);
+        mPointLightDrawList.clear();
+    }
+    {
+        std::lock_guard<std::mutex> lock(mSpotLightDrawListMutex);
+        mSpotLightDrawList.clear();
+    }
+    {
+        std::lock_guard<std::mutex> lock(mDirectionalLightDrawListMutex);
+        mDirectionalLightDrawList.clear();
+    }
+    {
+        std::lock_guard<std::mutex> lock(mAmbientLightDrawListMutex);
+        mAmbientLightDrawList.clear();
+    }
+    {
+        std::lock_guard<std::mutex> lock(mSpriteDrawListMutex);
+        mSpriteDrawList.clear();
+    }
+    {
+        std::lock_guard<std::mutex> lock(mPostProcessDrawListMutex);
+        mPostProcessDrawList.clear();
+    }
 }
 
 bool Renderer::GetTexture(const std::string &fileName, ResourceID &outID)

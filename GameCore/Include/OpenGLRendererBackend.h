@@ -39,16 +39,24 @@ public:
 private:
     // 描画の各段階
     void DrawMesh(
-        const std::vector<Renderer::MeshDrawInfo> &drawInfo, 
         const Matrix4 &view, 
-        const Matrix4 &proj);
-    void DrawLighting(const FrameDrawInfo &drawInfo);
-    //void DrawTransparent(const FrameDrawInfo &drawInfo);
-    //void DrawEffects(const FrameDrawInfo &drawInfo);
-    //void Draw3DSprites(const FrameDrawInfo &drawInfo);
-    //void Draw2DSprites(const FrameDrawInfo &drawInfo);
-    void DrawPostProcess(const FrameDrawInfo &drawInfo);
-    //void DrawUI(const FrameDrawInfo &drawInfo);
+        const Matrix4 &proj,
+        const std::vector<Renderer::MeshDrawInfo> &drawInfo
+    );
+    void DrawLighting(
+        const Matrix4 &view,
+        const Matrix4 &proj,
+        const std::vector<Renderer::PointLightDrawInfo> &pointLightInfo,
+        const std::vector<Renderer::SpotLightDrawInfo> &spotLightInfo,
+        const std::vector<Renderer::DirectionalLightDrawInfo> &directionalLightInfo,
+        const std::vector<Renderer::AmbientLightDrawInfo> &ambientLightInfo
+    );
+    //void DrawTransparent(const Renderer::SceneDrawInfo &drawInfo);
+    //void DrawEffects(const Renderer::SceneDrawInfo &drawInfo);
+    //void Draw3DSprites(const Renderer::SceneDrawInfo &drawInfo);
+    //void Draw2DSprites(const Renderer::SceneDrawInfo &drawInfo);
+    void DrawPostProcess(const std::vector<Renderer::PostProcessDrawInfo> &postProcessInfo);
+    //void DrawUI(const Renderer::SceneDrawInfo &drawInfo);
 
     // リソースのキャッシュ
     std::unordered_map<ResourceID, Texture    > mTextures;

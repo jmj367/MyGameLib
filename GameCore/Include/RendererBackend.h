@@ -39,16 +39,8 @@ public:
     // フレーム描画
     struct FrameDrawInfo
     {
-        SDL_Window *Window;
-        Matrix4 View;
-        Matrix4 Projection;
-        const std::vector<Renderer::MeshDrawInfo            > &MeshDrawInfos              ;
-        const std::vector<Renderer::PointLightDrawInfo      > &PointLightDrawInfos        ;
-        const std::vector<Renderer::SpotLightDrawInfo       > &SpotLightDrawInfos         ;
-        const std::vector<Renderer::DirectionalLightDrawInfo> &DirectionalLightDrawInfos  ;
-        const std::vector<Renderer::AmbientLightDrawInfo    > &AmbientLightDrawInfos      ;
-        const std::vector<Renderer::SpriteDrawInfo          > &SpriteDrawInfos            ;
-        const std::vector<Renderer::PostProcessDrawInfo     > &PostProcessDrawInfos       ;
+        void *WindowHandle;
+        const std::vector<Renderer::SceneDrawInfo>& DrawInfoList;
     };
     virtual void DrawFrame(const FrameDrawInfo& drawInfo) = 0;
 

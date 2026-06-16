@@ -4,7 +4,6 @@
 #include "Math.h"
 #include "MatrixPalette.h"
 #include <mutex>
-#include <SDL2/SDL.h>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -27,7 +26,7 @@ public:
 	virtual bool PrepareWindow(); // ウィンドウ作成前の初期化処理(必要なら)
 	virtual bool Initialize(void* windowHandle, float screenWidth, float screenHeight, GraphicsAPI apiType = GraphicsAPI::OpenGL);
 	virtual void Shutdown();
-	virtual void Draw(SDL_Window *window);
+	virtual void Draw(void *windowHandle);
 
 	// 各種描画コマンドの構造体と送信関数
 	// RendererBackendをラップする
@@ -109,6 +108,22 @@ public:
 	// ポストプロセスの描画コマンドを送信
 	void DrawPostProcess(const PostProcessDrawInfo &postProcessInfo);
 
+	// フレーム描画の構造体
+	struct SceneDrawInfo
+    {
+        Matrix4 View;
+        Matrix4 Projection;
+        std::vector<Renderer::MeshDrawInfo            > MeshDrawInfos              ;
+        std::vector<Renderer::PointLightDrawInfo      > PointLightDrawInfos        ;
+        std::vector<Renderer::SpotLightDrawInfo       > SpotLightDrawInfos         ;
+        std::vector<Renderer::DirectionalLightDrawInfo> DirectionalLightDrawInfos  ;
+        std::vector<Renderer::AmbientLightDrawInfo    > AmbientLightDrawInfos      ;
+        std::vector<Renderer::SpriteDrawInfo          > SpriteDrawInfos            ;
+        std::vector<Renderer::PostProcessDrawInfo     > PostProcessDrawInfos       ;
+    };
+	// フレーム描画のコマンドを送信
+	void DrawScene(const Matrix4 &view, const Matrix4 &proj);
+
 	// リソースの取得/解放
 	bool GetTexture		(const std::string &fileName, ResourceID& outID);
 	bool GetMesh		(const std::string &fileName, ResourceID& outID);
@@ -162,15 +177,18 @@ private:
 	// バックエンドのインスタンス
 	std::unique_ptr<RendererBackend> mBackend;
 
-	// 描画コマンド
-	std::vector<SpriteDrawInfo> 			mSpriteDrawList				;
-	std::vector<MeshDrawInfo> 				mMeshDrawList				;
-	std::vector<PointLightDrawInfo> 		mPointLightDrawList			;
-	std::vector<SpotLightDrawInfo> 			mSpotLightDrawList			;
+	// 描画コマンド一時保管用のリスト
+	// 描画コマンドはフレームの最後にまとめてRendererBackendに送信される想定
+	std::vector<SpriteDrawInfo			> mSpriteDrawList			;
+	std::vector<MeshDrawInfo			> mMeshDrawList				;
+	std::vector<PointLightDrawInfo		> mPointLightDrawList		;
+	std::vector<SpotLightDrawInfo		> mSpotLightDrawList		;
 	// ディレクショナルライトと環境光は数が少ないことが想定されるが、一応描画コマンドのリストにしておく
-	std::vector<DirectionalLightDrawInfo> 	mDirectionalLightDrawList	;
-	std::vector<AmbientLightDrawInfo> 		mAmbientLightDrawList		;
-	std::vector<PostProcessDrawInfo> 		mPostProcessDrawList		;
+	std::vector<DirectionalLightDrawInfo> mDirectionalLightDrawList	;
+	std::vector<AmbientLightDrawInfo	> mAmbientLightDrawList		;
+	std::vector<PostProcessDrawInfo		> mPostProcessDrawList		;
+
+	std::vector<SceneDrawInfo			> mSceneDrawList			;
 
 	// 描画コマンドのロック
 	// いずれマルチスレッドで描画コマンドを送信することも考えられるので、ロックを用意しておく
@@ -181,4 +199,5 @@ private:
 	std::mutex mDirectionalLightDrawListMutex	;
 	std::mutex mAmbientLightDrawListMutex		;
 	std::mutex mPostProcessDrawListMutex		;
+	std::mutex mFrameDrawListMutex				;
 };
