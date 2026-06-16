@@ -1,6 +1,9 @@
 #pragma once
 
+#include "EventBus.h"
+#include "InputSystem.h"
 #include "Math.h"
+#include "Renderer.h"
 #include <cstdint>
 #include <string>
 #include <unordered_map>
@@ -39,12 +42,12 @@ public:
 	class Font *GetFont(const std::string &fileName);
 
 	// アクセサ
-	class Renderer *GetRenderer() { return mRenderer; }
-	class AudioSystem *GetAudioSystem() { return mAudioSystem; }
-	class PhysWorld *GetPhysWorld() { return mPhysWorld; }
-	class InputSystem *GetInputSystem() { return mInputSystem; }
-	class EffectSystem *GetEffectSystem() { return mEffectSystem; }
-	class EventBus *GetEventBus() { return mEventBus; }
+	Renderer *GetRenderer() { return &mRenderer; }
+	//AudioSystem *GetAudioSystem() { return &mAudioSystem; }
+	//PhysWorld *GetPhysWorld() { return &mPhysWorld; }
+	InputSystem *GetInputSystem() { return &mInputSystem; }
+	//EffectSystem *GetEffectSystem() { return &mEffectSystem; }
+	EventBus *GetEventBus() { return &mEventBus; }
 
 	// その他ゲッター
 	bool GetIsDebug() const { return mIsDebug; }
@@ -76,12 +79,12 @@ private:
 	std::unordered_map<std::string, class Font *> mFonts;
 
 	// ユーティリティクラス
-	class Renderer *mRenderer;
-	class AudioSystem *mAudioSystem;
-	class PhysWorld *mPhysWorld;
-	class InputSystem *mInputSystem;
-	class EffectSystem *mEffectSystem; // レンダリングに関わるのでRendererに組み込んだ方が良いかもしれない
-	class EventBus *mEventBus;
+	Renderer mRenderer;
+	//AudioSystem *mAudioSystem;
+	//PhysWorld *mPhysWorld;
+	InputSystem mInputSystem;
+	//EffectSystem *mEffectSystem; // レンダリングに関わるのでRendererに組み込んだ方が良いかもしれない
+	EventBus mEventBus;
 
 	// チックカウント
 	// deltaTimeを求めるのに使う

@@ -109,8 +109,6 @@ public:
 	// ポストプロセスの描画コマンドを送信
 	void DrawPostProcess(const PostProcessDrawInfo &postProcessInfo);
 
-
-
 	// リソースの取得/解放
 	bool GetTexture		(const std::string &fileName, ResourceID& outID);
 	bool GetMesh		(const std::string &fileName, ResourceID& outID);
