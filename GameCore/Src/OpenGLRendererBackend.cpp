@@ -230,6 +230,20 @@ void OpenGLRendererBackend::DrawFrame(const FrameDrawInfo &drawInfo)
     DrawMesh(drawInfo.MeshDrawInfos, drawInfo.View, drawInfo.Projection);
     DrawLighting(drawInfo);
     DrawPostProcess(drawInfo);
+
+    // バックバッファに転送
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, mPostProcessBuffer.GetReadBufferID());
+
+    // 描画
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+
+    // バッファのスワップ
+    SDL_GL_SwapWindow(drawInfo.Window);
 }
 
 void OpenGLRendererBackend::DrawMesh(const std::vector<Renderer::MeshDrawInfo> &drawInfo, const Matrix4 &view, const Matrix4 &proj)

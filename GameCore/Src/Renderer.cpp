@@ -46,11 +46,12 @@ void Renderer::Shutdown()
     mBackend->Shutdown();
 }
 
-void Renderer::Draw()
+void Renderer::Draw(SDL_Window *window)
 {
     // パッケージング
     RendererBackend::FrameDrawInfo drawInfo
     {
+        window,
         mViewMat,
         mProjMat,
         mMeshDrawList,

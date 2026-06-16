@@ -4,6 +4,7 @@
 #include "Math.h"
 #include "MatrixPalette.h"
 #include "Renderer.h"
+#include <SDL2/SDL.h>
 #include <string>
 #include <vector>
 
@@ -38,6 +39,7 @@ public:
     // フレーム描画
     struct FrameDrawInfo
     {
+        SDL_Window *Window;
         Matrix4 View;
         Matrix4 Projection;
         const std::vector<Renderer::MeshDrawInfo            > &MeshDrawInfos              ;

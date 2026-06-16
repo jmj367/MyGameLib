@@ -4,6 +4,7 @@
 #include "Math.h"
 #include "MatrixPalette.h"
 #include <mutex>
+#include <SDL2/SDL.h>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -26,7 +27,7 @@ public:
 	virtual bool PrepareWindow(); // ウィンドウ作成前の初期化処理(必要なら)
 	virtual bool Initialize(void* windowHandle, float screenWidth, float screenHeight, GraphicsAPI apiType = GraphicsAPI::OpenGL);
 	virtual void Shutdown();
-	virtual void Draw();
+	virtual void Draw(SDL_Window *window);
 
 	// 各種描画コマンドの構造体と送信関数
 	// RendererBackendをラップする
