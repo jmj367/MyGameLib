@@ -5,6 +5,7 @@
 #include "InputSystem.h"
 #include "Math.h"
 #include "Renderer.h"
+#include <chrono>
 #include <cstdint>
 #include <string>
 #include <memory>
@@ -57,6 +58,9 @@ public:
 	bool GetIsDebug() const { return mIsDebug; }
 
 private:
+	using Clock = std::chrono::high_resolution_clock;
+	using TimePoint = Clock::time_point;
+
 	// ゲームループヘルパー
 	void ProcessInput();
 	void UpdateGame();
@@ -93,10 +97,8 @@ private:
 	// EffectSystem *mEffectSystem; // レンダリングに関わるのでRendererに組み込んだ方が良いかもしれない
 	EventBus mEventBus;
 
-	// チックカウント
 	// deltaTimeを求めるのに使う
-	uint32_t mTicksCount;
-
+	TimePoint mLastFrameTime;
 	// デバッグフラグ
 	bool mIsDebug;
 };

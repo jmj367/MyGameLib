@@ -52,6 +52,9 @@ bool Game::Initialize(WindowBackendType windowBackend, GraphicsAPI graphicsAPI)
         ReserveSceneActivation(event.SceneName);
     });
 
+    // フレーム開始時の時間を記録
+    mLastFrameTime = Clock::now();
+
     return true;
 }
 
@@ -118,8 +121,11 @@ void Game::ProcessInput()
 
 void Game::UpdateGame()
 {
-    // TODO: deltaTimeの計算
-    float deltaTime = 0.016f; // 仮の値
+    // deltaTimeの計算
+    TimePoint currentTime = Clock::now();
+    std::chrono::duration<float> deltaTimeDuration = currentTime - mLastFrameTime;
+    float deltaTime = deltaTimeDuration.count();
+    mLastFrameTime = currentTime;
 
     // deltaTimeが大きすぎる場合は補正する(デバッグ用)
     // HACK: 暫定的な処理
