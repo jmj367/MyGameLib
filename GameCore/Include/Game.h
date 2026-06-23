@@ -6,6 +6,7 @@
 #include "Renderer.h"
 #include <cstdint>
 #include <string>
+#include <memory>
 #include <unordered_map>
 #include <vector>
 
@@ -29,17 +30,11 @@ public:
 	GameState GetState() const { return mGameState; }
 	void SetState(GameState state) { mGameState = state; }
 
-	// シーン関連
-	class Scene *GetScene() { return mCurrentScene; }
-
-	// シーンの変更を予約する
-	// 現在のシーンから呼ばれる
-	// 更新は現在のシーンの更新が終わった後
-	// fileNameはシーンのロードに用いる
-	void ReserveChangeScene(class Scene *scene, const std::string &fileName = "");
+	// シーン管理
+	void AddScene(const std::string &sceneName);
 
 	// フォント取得
-	class Font *GetFont(const std::string &fileName);
+	//class Font *GetFont(const std::string &fileName);
 
 	// アクセサ
 	Renderer *GetRenderer() { return &mRenderer; }
@@ -58,7 +53,6 @@ private:
 	void GameInput(const struct InputState &state);
 	void UpdateGame();
 	void GenerateOutput();
-	void ChangeCurrentScene();
 
 	// ロード・アンロード
 	void LoadData();
@@ -67,16 +61,16 @@ private:
 	// 現在のゲーム状態
 	GameState mGameState;
 
-	// 現在のシーン
-	class Scene *mCurrentScene;
-	// 次のシーン
-	// null参照を回避するためにこうする
-	class Scene *mPendingScene;
-	bool mIsChangeScene;
-	std::string mPendingSceneFileName;
+	// ロードされたシーンのリスト
+	std::unordered_map<std::string, std::unique_ptr<class Scene>> mScenes;
+	// 現在アクティブなシーン
+	// 先頭から順に更新・描画される想定
+	std::vector<class Scene *> mActiveScenes;
+	// 追加予定のシーン
+	std::vector<std::string> mPendingScenes;
 
 	// フォントのキャッシュ
-	std::unordered_map<std::string, class Font *> mFonts;
+	//std::unordered_map<std::string, class Font *> mFonts;
 
 	// ユーティリティクラス
 	Renderer mRenderer;
