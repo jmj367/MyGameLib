@@ -218,7 +218,7 @@ void InputSystem::LoadInputBindings(const std::string &fileName)
 	}
 }
 
-void InputSystem::PrepareForPollEvent()
+void InputSystem::PreparePollEvent()
 {
 	// 過去の状態を更新する
 	// キーボード

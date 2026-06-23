@@ -445,7 +445,7 @@ public:
 	// Update前の処理
 	// 過去の状態を更新する・マウスホイールの値の初期化など
 	// PollEvent前なのは、SDL_PollEventでマウスホイールの変位を取得するため
-	void PrepareForPollEvent();
+	void PreparePollEvent();
 
 	// 現在の入力の更新
 	void Update();

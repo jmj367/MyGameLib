@@ -20,4 +20,31 @@ struct pair_hash
         // Boostのhash_combineの実装を参考にしたハッシュ関数
         return h1 ^ (h2 + 0x9e3779b9 + (h1 << 6) + (h1 >> 2));
     }
-}
+};
+
+// ウィンドウライブラリの種類
+enum class WindowBackendType
+{
+    None,
+    SDL2,
+};
+
+// グラフィックスAPIの種類
+enum class GraphicsAPI
+{
+    None,
+    OpenGL,
+};
+
+// シーンロードイベント
+struct EventLoadScene
+{
+    std::string SceneName;
+    bool IsActive;
+};
+
+// シーン起動イベント
+struct EventActivateScene
+{
+    std::string SceneName;
+};

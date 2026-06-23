@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Define.h"
 #include "EventBus.h"
 #include "InputSystem.h"
 #include "Math.h"
@@ -16,7 +17,7 @@ public:
 	Game();
 
 	// 初期化・ゲームループ・終了処理
-	bool Initialize();
+	bool Initialize(WindowBackendType windowBackend, GraphicsAPI graphicsAPI);
 	void RunLoop();
 	void Shutdown();
 
@@ -30,18 +31,26 @@ public:
 	GameState GetState() const { return mGameState; }
 	void SetState(GameState state) { mGameState = state; }
 
-	// シーン管理
-	void AddScene(const std::string &sceneName);
+	// シーンのロードの予約
+	struct PendingSceneLoad
+	{
+		std::string SceneName;
+		bool IsActive; // ロード後すぐにアクティブにするか
+	};
+	void ReserveSceneLoad(const PendingSceneLoad &scene);
+
+	// シーンをアクティブにする予約
+	void ReserveSceneActivation(const std::string &sceneName);
 
 	// フォント取得
-	//class Font *GetFont(const std::string &fileName);
+	// class Font *GetFont(const std::string &fileName);
 
 	// アクセサ
 	Renderer *GetRenderer() { return &mRenderer; }
-	//AudioSystem *GetAudioSystem() { return &mAudioSystem; }
-	//PhysWorld *GetPhysWorld() { return &mPhysWorld; }
+	// AudioSystem *GetAudioSystem() { return &mAudioSystem; }
+	// PhysWorld *GetPhysWorld() { return &mPhysWorld; }
 	InputSystem *GetInputSystem() { return &mInputSystem; }
-	//EffectSystem *GetEffectSystem() { return &mEffectSystem; }
+	// EffectSystem *GetEffectSystem() { return &mEffectSystem; }
 	EventBus *GetEventBus() { return &mEventBus; }
 
 	// その他ゲッター
@@ -50,34 +59,38 @@ public:
 private:
 	// ゲームループヘルパー
 	void ProcessInput();
-	void GameInput(const struct InputState &state);
 	void UpdateGame();
 	void GenerateOutput();
-
-	// ロード・アンロード
-	void LoadData();
-	void UnloadData();
+	void InnactivateScenes();
+	void UnloadScenes();
+	void LoadScenes();
+	void ActivateScenes();
 
 	// 現在のゲーム状態
 	GameState mGameState;
+
+	// ウィンドウクラス
+	std::unique_ptr<class Window> mWindow;
 
 	// ロードされたシーンのリスト
 	std::unordered_map<std::string, std::unique_ptr<class Scene>> mScenes;
 	// 現在アクティブなシーン
 	// 先頭から順に更新・描画される想定
 	std::vector<class Scene *> mActiveScenes;
-	// 追加予定のシーン
-	std::vector<std::string> mPendingScenes;
+	// ロード予約リスト
+	std::vector<PendingSceneLoad> mPendingSceneLoads;
+	// シーンのアクティブ予約リスト
+	std::vector<std::string> mReservedSceneActivations;
 
 	// フォントのキャッシュ
-	//std::unordered_map<std::string, class Font *> mFonts;
+	// std::unordered_map<std::string, class Font *> mFonts;
 
 	// ユーティリティクラス
 	Renderer mRenderer;
-	//AudioSystem *mAudioSystem;
-	//PhysWorld *mPhysWorld;
+	// AudioSystem *mAudioSystem;
+	// PhysWorld *mPhysWorld;
 	InputSystem mInputSystem;
-	//EffectSystem *mEffectSystem; // レンダリングに関わるのでRendererに組み込んだ方が良いかもしれない
+	// EffectSystem *mEffectSystem; // レンダリングに関わるのでRendererに組み込んだ方が良いかもしれない
 	EventBus mEventBus;
 
 	// チックカウント

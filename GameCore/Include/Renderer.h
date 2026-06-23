@@ -14,13 +14,7 @@ class RendererBackend;
 class Renderer
 {
 public:
-	// APIの種類
-	enum class GraphicsAPI
-	{
-		OpenGL,
-	};
-
-	Renderer(class Game *game);
+	Renderer();
 	virtual ~Renderer();
 
 	virtual bool PrepareWindow(); // ウィンドウ作成前の初期化処理(必要なら)
@@ -157,9 +151,6 @@ public:
 	void SetProjMatrix(const Matrix4 &projMat) { mProjMat = projMat; }
 
 private:
-	// ゲームクラスへのポインタ
-	class Game *mGame;
-
 	// スクリーンサイズ
 	float mScreenWidth;
 	float mScreenHeight;

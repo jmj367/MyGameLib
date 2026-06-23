@@ -21,10 +21,10 @@ public:
     // 状態
     enum class Status
     {
-        Uninitialized,
-        Active,
-        Inactive,
-        Exiting
+        EActive,
+        EInactive,
+        EExiting,
+        EUnloading,
     };
     Status GetStatus() const { return mStatus; }
     void SetStatus(Status status) { mStatus = status; }

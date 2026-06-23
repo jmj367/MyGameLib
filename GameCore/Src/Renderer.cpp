@@ -4,9 +4,8 @@
 #include "Shader.h"
 #include "Texture.h"
 
-Renderer::Renderer(Game *game)
-    : mGame(game)
-    , mScreenWidth(0.0f)
+Renderer::Renderer()
+    : mScreenWidth(0.0f)
     , mScreenHeight(0.0f)
 {
 }
